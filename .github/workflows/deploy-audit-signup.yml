@@ -28,7 +28,3 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: workers/audit-signup
-          secrets: |
-            TURNSTILE_SECRET
-        env:
-          TURNSTILE_SECRET: ${{ secrets.TURNSTILE_SECRET }}
