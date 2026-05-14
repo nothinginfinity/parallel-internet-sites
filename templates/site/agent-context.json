@@ -25,5 +25,9 @@
   },
   "brand_voice": "{{BRAND_VOICE}}",
   "social": {},
-  "source_of_truth_pages": []
+  "source_of_truth_pages": [],
+  "content_role": "{{CONTENT_ROLE}}",
+  "canonical_identity_source": "{{CANONICAL_IDENTITY_SOURCE}}",
+  "cross_domain_entity_id": "{{CROSS_DOMAIN_ENTITY_ID}}",
+  "last_synced": "{{LAST_SYNCED}}"
 }

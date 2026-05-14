@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Agent-priority sitemap: highest-value pages for AI crawlers listed first -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:agent="https://parallelinternet.ai/ns/agent-sitemap/1.0">
+  <!--
+    Agent-priority sitemap for Parallel Internet Site.
+    Cross-domain declarations (Phase 3 AFO Integration Rules — MSG-REV-003):
+      agent:mainDomain     — canonical identity source (main domain)
+      agent:contentRole    — role of this site in the cross-domain AFO layer
+  -->
+  <agent:mainDomain>https://{{MAIN_WEBSITE_URL}}</agent:mainDomain>
+  <agent:contentRole>knowledge-expansion</agent:contentRole>
+
   <url>
     <loc>https://{{PARALLEL_SITE_URL}}/faq</loc>
     <priority>0.9</priority>
