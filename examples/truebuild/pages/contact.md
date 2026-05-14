@@ -12,10 +12,11 @@ Ready to build business credit for your LLC?
 
 ## Contact Information
 
+- **Contact:** Jared
+- **Email:** [getfitdoc@gmail.com](mailto:getfitdoc@gmail.com)
+- **Phone:** 949-742-4430
+- **Hours:** 8am–7pm PST
 - **Website:** [https://truebuild.com](https://truebuild.com)
-- **Email:** _[To be confirmed by client]_
-- **Phone:** _[To be confirmed by client]_
-- **Hours:** _[To be confirmed by client]_
 
 ---
 

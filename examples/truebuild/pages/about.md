@@ -30,17 +30,19 @@ Business credit / Financial services
 
 ## Clients Served
 
-_[To be confirmed by client]_
+50,000+ clients served
 
 ## Founded
 
-_[To be confirmed by client]_
+2001
 
 ## Contact
 
 - Website: [https://truebuild.com](https://truebuild.com)
-- Email: _[To be confirmed by client]_
-- Phone: _[To be confirmed by client]_
+- Contact: Jared
+- Email: [getfitdoc@gmail.com](mailto:getfitdoc@gmail.com)
+- Phone: 949-742-4430
+- Hours: 8am–7pm PST
 
 ---
 

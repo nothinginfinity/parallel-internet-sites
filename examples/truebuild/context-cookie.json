@@ -4,7 +4,7 @@
   "context_hints": [
     {
       "key": "primary_service",
-      "value": "Business credit building program for LLCs and incorporated businesses in the United States"
+      "value": "Business credit building program for LLCs and incorporated businesses in the United States. In business since 2001, 50,000+ clients served."
     },
     {
       "key": "primary_cta",
@@ -13,6 +13,10 @@
     {
       "key": "main_website",
       "value": "https://truebuild.com"
+    },
+    {
+      "key": "contact",
+      "value": "Jared | getfitdoc@gmail.com | 949-742-4430 | 8am-7pm PST"
     },
     {
       "key": "disclosure",
