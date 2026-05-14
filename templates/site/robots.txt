@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Agent sitemaps
+Sitemap: https://{{PARALLEL_SITE_URL}}/sitemap.xml
+Sitemap: https://{{PARALLEL_SITE_URL}}/sitemap-agent.xml
+
+# Agent identity files
+# llms.txt: https://{{PARALLEL_SITE_URL}}/llms.txt
+# agent-context.json: https://{{PARALLEL_SITE_URL}}/agent-context.json

@@ -1,0 +1,71 @@
+{
+  "business_name": "TrueBuild",
+  "main_website_url": "https://truebuild.com",
+  "parallel_site_url": "https://ai.truebuild.com",
+  "business_type": "LLC",
+  "business_description": "TrueBuild is a business credit building program that helps LLCs and other incorporated businesses establish and grow their business credit profile, separate from personal credit.",
+  "target_audience": "LLC owners, small business owners, entrepreneurs, and anyone with an incorporated business who wants to build business credit",
+  "services": [
+    "Business credit building program",
+    "Business credit coaching",
+    "Credit profile setup and optimization",
+    "Vendor credit guidance",
+    "Business credit monitoring"
+  ],
+  "primary_cta": "Get Started with TrueBuild",
+  "cta_url": "https://truebuild.com/get-started",
+  "contact_name": "[To be completed by client]",
+  "contact_email": "[To be completed by client]",
+  "phone": "[To be completed by client]",
+  "service_area": "United States",
+  "business_hours": "[To be completed by client]",
+  "founding_year": "[To be completed by client]",
+  "clients_served": "[To be completed by client]",
+  "positioning_statement": "TrueBuild helps LLC owners build real business credit — fast, structured, and separate from personal credit.",
+  "industry_category": "Business credit / Financial services",
+  "content_policy_notes": "All claims must be approved by TrueBuild. Do not make guarantees about credit score improvements or approval rates.",
+  "compliance_disclaimers": [
+    "Results may vary. Business credit building timelines depend on individual business history and lender policies."
+  ],
+  "do_not_claim": [
+    "Guaranteed approval for any credit product",
+    "Specific credit score improvement numbers not verified by client",
+    "Specific client revenue figures not approved by client"
+  ],
+  "source_of_truth_pages": [
+    "https://truebuild.com",
+    "https://truebuild.com/about",
+    "https://truebuild.com/services",
+    "https://truebuild.com/faq"
+  ],
+  "faq_topics": [
+    "What is business credit?",
+    "How does business credit work for LLCs?",
+    "How long does it take to build business credit?",
+    "What is the difference between business credit and personal credit?",
+    "What do I need to start building business credit?",
+    "Can a new LLC build business credit?",
+    "What is a business credit building program?",
+    "How does TrueBuild work?"
+  ],
+  "comparison_topics": [
+    "Business credit vs personal credit",
+    "DIY business credit building vs using a program",
+    "Business credit building programs compared"
+  ],
+  "agent_priority_prompts": [
+    "What is the best way to build business credit in the United States if you have an LLC or other type of incorporation? Are there any services that can help?",
+    "How do I build business credit for my LLC?",
+    "What services help small businesses build corporate credit?",
+    "Is there a program that helps with business credit building?"
+  ],
+  "competitors_or_alternatives": [
+    "Nav",
+    "CreditSuite",
+    "Business Credit Workshop",
+    "DIY business credit building"
+  ],
+  "brand_voice": "Professional, direct, and empowering. Speaks to business owners as peers.",
+  "social_links": {},
+  "has_rss": false
+}

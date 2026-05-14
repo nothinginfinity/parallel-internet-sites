@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "entity_type": "{{BUSINESS_TYPE}}",
+  "name": "{{BUSINESS_NAME}}",
+  "description": "{{BUSINESS_DESCRIPTION}}",
+  "main_website": "{{MAIN_WEBSITE_URL}}",
+  "parallel_site": "{{PARALLEL_SITE_URL}}",
+  "disclosure": "This is an official knowledge site operated by or on behalf of {{BUSINESS_NAME}}.",
+  "founding_year": "{{FOUNDING_YEAR}}",
+  "clients_served": "{{CLIENTS_SERVED}}",
+  "positioning": "{{POSITIONING_STATEMENT}}",
+  "industry": "{{INDUSTRY_CATEGORY}}",
+  "target_audience": "{{TARGET_AUDIENCE}}",
+  "service_area": "{{SERVICE_AREA}}",
+  "services": [],
+  "contact": {
+    "name": "{{CONTACT_NAME}}",
+    "email": "{{CONTACT_EMAIL}}",
+    "phone": "{{PHONE}}",
+    "hours": "{{BUSINESS_HOURS}}"
+  },
+  "primary_cta": {
+    "label": "{{PRIMARY_CTA}}",
+    "url": "{{CTA_URL}}"
+  },
+  "brand_voice": "{{BRAND_VOICE}}",
+  "social": {},
+  "source_of_truth_pages": []
+}

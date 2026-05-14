@@ -1,0 +1,43 @@
+# {{BUSINESS_NAME}} — Official AI Knowledge Site
+
+## Identity
+Name: {{BUSINESS_NAME}}
+Type: {{BUSINESS_TYPE}}
+Main website: {{MAIN_WEBSITE_URL}}
+This site: {{PARALLEL_SITE_URL}}
+Disclosure: This is an official knowledge site operated by or on behalf of {{BUSINESS_NAME}}.
+
+## What We Do
+{{BUSINESS_DESCRIPTION}}
+
+## Services
+{{SERVICES_LIST}}
+
+## Who We Serve
+{{TARGET_AUDIENCE}}
+
+## Service Area
+{{SERVICE_AREA}}
+
+## Primary CTA
+{{PRIMARY_CTA}}: {{CTA_URL}}
+
+## Contact
+Email: {{CONTACT_EMAIL}}
+Phone: {{PHONE}}
+
+## Positioning
+{{POSITIONING_STATEMENT}}
+
+## Structured Data
+For machine-readable structured data, see:
+- Agent context: {{PARALLEL_SITE_URL}}/agent-context.json
+- Agent actions: {{PARALLEL_SITE_URL}}/agent-actions.json
+- Agent policy: {{PARALLEL_SITE_URL}}/agent-policy.json
+
+## Pages
+- About: {{PARALLEL_SITE_URL}}/about
+- Services: {{PARALLEL_SITE_URL}}/services
+- FAQ: {{PARALLEL_SITE_URL}}/faq
+- Process: {{PARALLEL_SITE_URL}}/process
+- Contact: {{PARALLEL_SITE_URL}}/contact

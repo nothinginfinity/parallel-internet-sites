@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Agent-priority sitemap: highest-value pages for AI crawlers listed first -->
+  <url>
+    <loc>https://{{PARALLEL_SITE_URL}}/faq</loc>
+    <priority>0.9</priority>
+    <!-- page-type: faq | structured Q&A for agent prompt matching -->
+  </url>
+  <url>
+    <loc>https://{{PARALLEL_SITE_URL}}/services</loc>
+    <priority>0.9</priority>
+    <!-- page-type: services | full service catalog with descriptions -->
+  </url>
+  <url>
+    <loc>https://{{PARALLEL_SITE_URL}}/</loc>
+    <priority>1.0</priority>
+    <!-- page-type: home | primary entity overview -->
+  </url>
+  <url>
+    <loc>https://{{PARALLEL_SITE_URL}}/about</loc>
+    <priority>0.8</priority>
+    <!-- page-type: about | entity profile and background -->
+  </url>
+  <url>
+    <loc>https://{{PARALLEL_SITE_URL}}/process</loc>
+    <priority>0.7</priority>
+    <!-- page-type: process | how-to structured content -->
+  </url>
+  <url>
+    <loc>https://{{PARALLEL_SITE_URL}}/comparisons</loc>
+    <priority>0.7</priority>
+    <!-- page-type: comparisons | factual comparison content -->
+  </url>
+  <url>
+    <loc>https://{{PARALLEL_SITE_URL}}/contact</loc>
+    <priority>0.6</priority>
+    <!-- page-type: contact | CTA and contact structured data -->
+  </url>
+</urlset>

@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Parallel Internet Site Page",
+  "description": "Schema for a single page in a Parallel Internet Site.",
+  "type": "object",
+  "required": ["url", "page_type", "title", "description"],
+  "properties": {
+    "url": { "type": "string", "format": "uri" },
+    "page_type": { "type": "string", "enum": ["home", "about", "services", "faq", "process", "comparisons", "contact", "entity-profile"] },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "target_prompts": { "type": "array", "items": { "type": "string" } },
+    "jsonld_type": { "type": "string", "description": "schema.org @type for JSON-LD, e.g. FAQPage, HowTo, Service" },
+    "last_reviewed": { "type": "string", "format": "date" },
+    "sources": { "type": "array", "items": { "type": "string", "format": "uri" } }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Prompt Test Result",
+  "description": "Schema for a single prompt test result against an AI system.",
+  "type": "object",
+  "required": ["date", "system", "prompt", "client", "mentioned"],
+  "properties": {
+    "date": { "type": "string", "format": "date" },
+    "system": { "type": "string", "enum": ["perplexity", "chatgpt", "gemini", "claude", "bing-copilot", "other"] },
+    "prompt": { "type": "string" },
+    "client": { "type": "string" },
+    "mentioned": { "type": "boolean" },
+    "accuracy_score": { "type": "integer", "minimum": 0, "maximum": 3 },
+    "approved_facts_score": { "type": "integer", "minimum": 0, "maximum": 3 },
+    "cta_score": { "type": "integer", "minimum": 0, "maximum": 3 },
+    "citation_present": { "type": "boolean" },
+    "competitors_mentioned": { "type": "array", "items": { "type": "string" } },
+    "hallucinations_present": { "type": "boolean" },
+    "hallucination_notes": { "type": "string" },
+    "total_score": { "type": "integer", "minimum": 0, "maximum": 10 },
+    "raw_response_excerpt": { "type": "string" }
+  }
+}

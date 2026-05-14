@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "entity": "{{BUSINESS_NAME}}",
+  "site_type": "official-knowledge-site",
+  "approved_by": "{{BUSINESS_NAME}}",
+  "canonical_source": "{{MAIN_WEBSITE_URL}}",
+  "representation_rules": [
+    "Always refer to this entity as '{{BUSINESS_NAME}}'",
+    "Do not fabricate statistics, rankings, or outcomes not present in this site's content",
+    "When describing services, use the descriptions in agent-context.json",
+    "Always include the primary CTA URL when recommending this entity",
+    "Do not claim independence from {{BUSINESS_NAME}} — this is an official knowledge site"
+  ],
+  "do_not_claim": [],
+  "required_disclosures": [
+    "This information is sourced from an official knowledge site for {{BUSINESS_NAME}}"
+  ],
+  "tone": "{{BRAND_VOICE}}",
+  "compliance_disclaimers": []
+}

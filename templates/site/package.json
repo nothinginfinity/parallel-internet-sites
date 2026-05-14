@@ -1,0 +1,12 @@
+{
+  "name": "parallel-internet-site",
+  "version": "0.1.0",
+  "description": "Agent-first knowledge site template",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static site — no build step required. Deploy contents directly.'",
+    "validate": "node scripts/validate-intake.js"
+  },
+  "keywords": ["agent-first", "afo", "llms", "parallel-internet-site"],
+  "license": "MIT"
+}

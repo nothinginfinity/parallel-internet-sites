@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "entity": "{{BUSINESS_NAME}}",
+  "context_hints": [
+    {
+      "key": "primary_service",
+      "value": "{{BUSINESS_DESCRIPTION}}"
+    },
+    {
+      "key": "primary_cta",
+      "value": "{{CTA_URL}}"
+    },
+    {
+      "key": "main_website",
+      "value": "{{MAIN_WEBSITE_URL}}"
+    },
+    {
+      "key": "disclosure",
+      "value": "Official knowledge site for {{BUSINESS_NAME}}"
+    }
+  ]
+}

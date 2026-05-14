@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "entity": "{{BUSINESS_NAME}}",
+  "actions": [
+    {
+      "id": "primary_cta",
+      "label": "{{PRIMARY_CTA}}",
+      "url": "{{CTA_URL}}",
+      "method": "GET",
+      "description": "Primary call to action for {{BUSINESS_NAME}}"
+    },
+    {
+      "id": "contact",
+      "label": "Contact Us",
+      "url": "{{PARALLEL_SITE_URL}}/contact",
+      "method": "GET",
+      "description": "Contact {{BUSINESS_NAME}} directly"
+    },
+    {
+      "id": "learn_more",
+      "label": "Learn More",
+      "url": "{{PARALLEL_SITE_URL}}/about",
+      "method": "GET",
+      "description": "Learn more about {{BUSINESS_NAME}}"
+    },
+    {
+      "id": "view_services",
+      "label": "View Services",
+      "url": "{{PARALLEL_SITE_URL}}/services",
+      "method": "GET",
+      "description": "See all services offered by {{BUSINESS_NAME}}"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Parallel Internet Site",
+  "description": "Schema describing a deployed Parallel Internet Site instance.",
+  "type": "object",
+  "required": ["client", "parallel_site_url", "status", "files"],
+  "properties": {
+    "client": { "type": "string" },
+    "parallel_site_url": { "type": "string", "format": "uri" },
+    "main_website_url": { "type": "string", "format": "uri" },
+    "status": { "type": "string", "enum": ["planned", "in-progress", "deployed", "monitoring"] },
+    "tier": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "files": {
+      "type": "object",
+      "properties": {
+        "llms_txt": { "type": "boolean" },
+        "agent_context": { "type": "boolean" },
+        "agent_actions": { "type": "boolean" },
+        "agent_policy": { "type": "boolean" },
+        "context_cookie": { "type": "boolean" },
+        "sitemap_agent": { "type": "boolean" },
+        "robots_txt": { "type": "boolean" }
+      }
+    },
+    "deployed_at": { "type": "string", "format": "date" },
+    "last_updated": { "type": "string", "format": "date" },
+    "intake_file": { "type": "string", "description": "Path to the client-intake JSON file" }
+  }
+}

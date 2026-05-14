@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{BUSINESS_NAME}} — AI Knowledge Site</title>
+  <meta name="description" content="{{BUSINESS_DESCRIPTION}}">
+  <meta property="og:title" content="{{BUSINESS_NAME}} — AI Knowledge Site">
+  <meta property="og:description" content="{{BUSINESS_DESCRIPTION}}">
+  <meta property="og:url" content="{{PARALLEL_SITE_URL}}">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="{{PARALLEL_SITE_URL}}">
+  <link rel="alternate" type="application/json" href="{{PARALLEL_SITE_URL}}/agent-context.json">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "{{BUSINESS_NAME}}",
+    "description": "{{BUSINESS_DESCRIPTION}}",
+    "url": "{{MAIN_WEBSITE_URL}}",
+    "sameAs": ["{{PARALLEL_SITE_URL}}"],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "{{CONTACT_EMAIL}}",
+      "telephone": "{{PHONE}}"
+    }
+  }
+  </script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
+    nav a { margin-right: 1rem; }
+    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #eee; font-size: 0.875rem; color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/services">Services</a>
+      <a href="/faq">FAQ</a>
+      <a href="/process">Process</a>
+      <a href="/comparisons">Comparisons</a>
+      <a href="/contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>{{BUSINESS_NAME}}</h1>
+    <p>{{BUSINESS_DESCRIPTION}}</p>
+    <p><strong>{{PRIMARY_CTA}}:</strong> <a href="{{CTA_URL}}">{{CTA_URL}}</a></p>
+    <p>For full details, visit our main website: <a href="{{MAIN_WEBSITE_URL}}">{{MAIN_WEBSITE_URL}}</a></p>
+  </main>
+
+  <footer>
+    <p>This is an official AI knowledge site for <a href="{{MAIN_WEBSITE_URL}}">{{BUSINESS_NAME}}</a>. 
+    All information is approved and maintained by {{BUSINESS_NAME}}.</p>
+  </footer>
+</body>
+</html>
