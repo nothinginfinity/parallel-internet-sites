@@ -1,0 +1,26 @@
+name = "afo-audit-signup"
+main = "index.js"
+compatibility_date = "2024-09-23"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "afo-v1"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[vars]
+# Non-secret runtime config
+EMAIL_PROVIDER = "log"            # "resend" | "sendgrid" | "log"
+GITHUB_REPO_OWNER = "nothinginfinity"
+GITHUB_REPO_NAME = "agent-feed-optimization"
+
+# Secrets — set via: wrangler secret put SECRET_NAME
+# TURNSTILE_SECRET
+# EMAIL_API_KEY
+# EMAIL_FROM
+# ADMIN_EMAIL
+# GITHUB_TOKEN
+
+# Routes (update after Cloudflare Pages custom domain is set)
+[[routes]]
+pattern = "agentfeedoptimization.com/api/*"
+zone_name = "agentfeedoptimization.com"

@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "schema_version": "1.0",
+    "client_slug": "afo",
+    "generated_at": "2026-05-14T00:00:00Z",
+    "generator": "alice/manual",
+    "notes": "AFO is Customer #1 — dogfood intake. This is the reference intake for the AFO domain itself."
+  },
+  "client": {
+    "name": "Jared",
+    "business_name": "Agent Feed Optimization",
+    "email": "REPLACE_WITH_JARED_EMAIL",
+    "role": "Founder",
+    "website_url": "https://agentfeedoptimization.com",
+    "canonical_domain": "agentfeedoptimization.com",
+    "parallel_site_domain": "ai.agentfeedoptimization.com",
+    "coupon_code": "AFO-FOUNDER",
+    "plan": "founder_free",
+    "source": "internal_dogfood",
+    "launch_phase": "dogfood_v1"
+  },
+  "site": {
+    "business_name": "Agent Feed Optimization",
+    "tagline": "Make your brand legible to AI — before your competitors do.",
+    "description": "Agent Feed Optimization (AFO) helps businesses audit and improve how AI systems like ChatGPT, Perplexity, Gemini, and Claude understand and represent their brand. We install structured context files on your domain so AI agents can accurately describe who you are, what you do, and why you matter.",
+    "primary_cta": "Start Your Free Audit",
+    "cta_url": "https://agentfeedoptimization.com/start",
+    "contact_email": "REPLACE_WITH_CONTACT_EMAIL",
+    "founded_year": "2026",
+    "location": "San Juan Capistrano, California, USA"
+  },
+  "services": [
+    {
+      "id": "afo-audit",
+      "name": "AFO Audit",
+      "description": "A complete analysis of how AI systems currently perceive your brand, including visibility, accuracy, citation, and discoverability scores."
+    },
+    {
+      "id": "afo-files",
+      "name": "AFO File Installation",
+      "description": "Deployment of structured context files (agent-context.json, llms.txt, agent-policy.json, context-cookie.json, agent-actions.json) to your domain."
+    },
+    {
+      "id": "parallel-site",
+      "name": "Parallel Internet Site",
+      "description": "A dedicated AI-facing subdomain (ai.yourdomain.com) optimized for LLM crawlers and agent retrieval."
+    },
+    {
+      "id": "monitoring",
+      "name": "LLM Visibility Monitoring",
+      "description": "Day 7, Day 30, Day 60, and Day 90 monitoring reports tracking visibility, accuracy, citation, and discoverability over time."
+    }
+  ],
+  "audit_config": {
+    "audit_signup_endpoint": "https://agentfeedoptimization.com/api/audit-signup",
+    "turnstile_site_key": "REPLACE_WITH_TURNSTILE_SITE_KEY",
+    "baseline_completed": false,
+    "baseline_date": null,
+    "baseline_file": "examples/afo/prompt-tests/day-0-baseline.md",
+    "afo_files_deployed": false,
+    "afo_deploy_date": null
+  },
+  "nav": [
+    { "label": "Home", "url": "/" },
+    { "label": "How It Works", "url": "/pages/process.html" },
+    { "label": "Services", "url": "/pages/services.html" },
+    { "label": "FAQ", "url": "/pages/faq.html" },
+    { "label": "About", "url": "/pages/about.html" },
+    { "label": "Start Free Audit", "url": "/start", "cta": true }
+  ],
+  "tokens": {
+    "AUDIT_SIGNUP_ENDPOINT": "https://agentfeedoptimization.com/api/audit-signup",
+    "TURNSTILE_SITE_KEY": "REPLACE_WITH_TURNSTILE_SITE_KEY",
+    "CANONICAL_DOMAIN": "https://agentfeedoptimization.com",
+    "PARALLEL_SITE_DOMAIN": "https://ai.agentfeedoptimization.com"
+  }
+}
