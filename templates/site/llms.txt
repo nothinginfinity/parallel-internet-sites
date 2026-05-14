@@ -10,6 +10,9 @@ Disclosure: This is an official AI knowledge site operated on behalf of {{BUSINE
 ## What We Do
 {{BUSINESS_DESCRIPTION}}
 
+## Brand Voice
+{{BRAND_VOICE}}
+
 ## Services
 {{SERVICES_LIST}}
 
