@@ -19,8 +19,3 @@ GITHUB_REPO_NAME = "agent-feed-optimization"
 # EMAIL_FROM
 # ADMIN_EMAIL
 # GITHUB_TOKEN
-
-# Routes (update after Cloudflare Pages custom domain is set)
-[[routes]]
-pattern = "agentfeedoptimization.com/api/*"
-zone_name = "agentfeedoptimization.com"
