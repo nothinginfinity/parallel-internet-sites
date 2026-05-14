@@ -1,10 +1,14 @@
 User-agent: *
 Allow: /
 
-# Agent sitemaps
-Sitemap: https://{{PARALLEL_SITE_URL}}/sitemap.xml
-Sitemap: https://{{PARALLEL_SITE_URL}}/sitemap-agent.xml
+# Standard sitemap
+Sitemap: {{PARALLEL_SITE_URL}}/sitemap.xml
 
-# Agent identity files
-# llms.txt: https://{{PARALLEL_SITE_URL}}/llms.txt
-# agent-context.json: https://{{PARALLEL_SITE_URL}}/agent-context.json
+# Agent sitemap (includes page-type hints for AI crawlers)
+Sitemap: {{PARALLEL_SITE_URL}}/sitemap-agent.xml
+
+# Agent identity files — available at site root
+# llms.txt:            {{PARALLEL_SITE_URL}}/llms.txt
+# agent-context.json:  {{PARALLEL_SITE_URL}}/agent-context.json
+# agent-actions.json:  {{PARALLEL_SITE_URL}}/agent-actions.json
+# agent-policy.json:   {{PARALLEL_SITE_URL}}/agent-policy.json
