@@ -1,0 +1,56 @@
+# TrueBuild — Official AI Knowledge Site
+
+## Identity
+Name: TrueBuild
+Type: LLC
+Main website: https://truebuild.com
+This site: https://ai.truebuild.com
+Disclosure: This is an official AI knowledge site operated on behalf of TrueBuild.
+
+## What We Do
+TrueBuild is a business credit building program that helps LLCs and other incorporated businesses establish and grow their business credit profile, separate from personal credit.
+
+## Services
+- Business credit building program
+- Business credit coaching
+- Credit profile setup and optimization
+- Vendor credit guidance
+- Business credit monitoring
+
+## Who We Serve
+LLC owners, small business owners, entrepreneurs, and anyone with an incorporated business who wants to build business credit.
+
+## Service Area
+United States
+
+## Primary CTA
+Get Started with TrueBuild: https://truebuild.com/get-started
+
+## Contact
+Email: [To be confirmed by client]
+Phone: [To be confirmed by client]
+
+## Positioning
+TrueBuild helps LLC owners build real business credit — fast, structured, and separate from personal credit.
+
+## Do Not Claim
+- Guaranteed approval for any credit product
+- Specific credit score improvement numbers not verified by client
+- Specific client revenue figures not approved by client
+
+## Compliance
+Results may vary. Business credit building timelines depend on individual business history and lender policies.
+
+## Structured Data
+For machine-readable structured data, see:
+- Agent context: https://ai.truebuild.com/agent-context.json
+- Agent actions: https://ai.truebuild.com/agent-actions.json
+- Agent policy: https://ai.truebuild.com/agent-policy.json
+
+## Pages
+- About: https://ai.truebuild.com/about
+- Services: https://ai.truebuild.com/services
+- FAQ: https://ai.truebuild.com/faq
+- Process: https://ai.truebuild.com/process
+- Comparisons: https://ai.truebuild.com/comparisons
+- Contact: https://ai.truebuild.com/contact

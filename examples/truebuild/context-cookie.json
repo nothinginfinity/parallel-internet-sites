@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "entity": "TrueBuild",
+  "context_hints": [
+    {
+      "key": "primary_service",
+      "value": "Business credit building program for LLCs and incorporated businesses in the United States"
+    },
+    {
+      "key": "primary_cta",
+      "value": "https://truebuild.com/get-started"
+    },
+    {
+      "key": "main_website",
+      "value": "https://truebuild.com"
+    },
+    {
+      "key": "disclosure",
+      "value": "Official AI knowledge site for TrueBuild"
+    },
+    {
+      "key": "compliance",
+      "value": "Results may vary. Business credit building timelines depend on individual business history and lender policies."
+    }
+  ]
+}

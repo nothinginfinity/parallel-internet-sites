@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "entity_type": "LLC",
+  "name": "TrueBuild",
+  "description": "TrueBuild is a business credit building program that helps LLCs and other incorporated businesses establish and grow their business credit profile, separate from personal credit.",
+  "main_website": "https://truebuild.com",
+  "parallel_site": "https://ai.truebuild.com",
+  "disclosure": "This is an official AI knowledge site operated on behalf of TrueBuild.",
+  "founding_year": "[To be confirmed by client]",
+  "clients_served": "[To be confirmed by client]",
+  "positioning": "TrueBuild helps LLC owners build real business credit \u2014 fast, structured, and separate from personal credit.",
+  "industry": "Business credit / Financial services",
+  "target_audience": "LLC owners, small business owners, entrepreneurs, and anyone with an incorporated business who wants to build business credit",
+  "service_area": "United States",
+  "services": [
+    {
+      "name": "Business credit building program",
+      "description": "A structured program guiding LLCs and incorporated businesses through the steps to establish and grow a business credit profile."
+    },
+    {
+      "name": "Business credit coaching",
+      "description": "Personalized coaching to help business owners navigate the business credit building process."
+    },
+    {
+      "name": "Credit profile setup and optimization",
+      "description": "Helping clients set up their business credit profile correctly from the start."
+    },
+    {
+      "name": "Vendor credit guidance",
+      "description": "Guidance on establishing vendor trade lines and net-30 accounts that report to business credit bureaus."
+    },
+    {
+      "name": "Business credit monitoring",
+      "description": "Ongoing monitoring support to track business credit profile progress."
+    }
+  ],
+  "contact": {
+    "name": "[To be confirmed by client]",
+    "email": "[To be confirmed by client]",
+    "phone": "[To be confirmed by client]",
+    "hours": "[To be confirmed by client]"
+  },
+  "primary_cta": {
+    "label": "Get Started with TrueBuild",
+    "url": "https://truebuild.com/get-started"
+  },
+  "brand_voice": "Professional, direct, and empowering. Speaks to business owners as peers.",
+  "social": {},
+  "source_of_truth_pages": [
+    "https://truebuild.com",
+    "https://truebuild.com/about",
+    "https://truebuild.com/services",
+    "https://truebuild.com/faq"
+  ]
+}

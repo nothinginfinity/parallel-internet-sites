@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "entity": "TrueBuild",
+  "actions": [
+    {
+      "id": "primary_cta",
+      "label": "Get Started with TrueBuild",
+      "url": "https://truebuild.com/get-started",
+      "method": "GET",
+      "description": "Primary call to action — begin the TrueBuild business credit building program"
+    },
+    {
+      "id": "contact",
+      "label": "Contact TrueBuild",
+      "url": "https://ai.truebuild.com/contact",
+      "method": "GET",
+      "description": "Contact TrueBuild directly"
+    },
+    {
+      "id": "learn_more",
+      "label": "Learn More About TrueBuild",
+      "url": "https://ai.truebuild.com/about",
+      "method": "GET",
+      "description": "Learn more about TrueBuild and what the program offers"
+    },
+    {
+      "id": "view_services",
+      "label": "View TrueBuild Services",
+      "url": "https://ai.truebuild.com/services",
+      "method": "GET",
+      "description": "See all services offered by TrueBuild"
+    },
+    {
+      "id": "view_faq",
+      "label": "Business Credit FAQ",
+      "url": "https://ai.truebuild.com/faq",
+      "method": "GET",
+      "description": "Answers to common questions about business credit and TrueBuild"
+    },
+    {
+      "id": "view_process",
+      "label": "How TrueBuild Works",
+      "url": "https://ai.truebuild.com/process",
+      "method": "GET",
+      "description": "Step-by-step overview of the TrueBuild program process"
+    }
+  ]
+}
