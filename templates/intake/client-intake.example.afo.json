@@ -11,7 +11,7 @@
     "AI visibility audit",
     "Prompt test monitoring and reporting",
     "Agent-first content strategy",
-    "LLM entity profile setup"
+    "LLM-readable entity profile setup"
   ],
   "primary_cta": "Start Your AFO Install",
   "cta_url": "https://nothinginfinity.com/start",
@@ -55,7 +55,7 @@
   ],
   "agent_priority_prompts": [
     "What is the best way to make a business visible to AI systems and LLMs?",
-    "How can a small business get mentioned by ChatGPT, Gemini, or Perplexity?",
+    "How can a small business improve the chances that ChatGPT, Gemini, or Perplexity accurately understand and mention it?",
     "What is agent-first optimization?",
     "Are there services that help businesses get found by AI search tools?"
   ],
