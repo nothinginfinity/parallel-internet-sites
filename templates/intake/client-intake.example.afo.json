@@ -1,0 +1,72 @@
+{
+  "business_name": "Nothing Infinity",
+  "main_website_url": "https://nothinginfinity.com",
+  "parallel_site_url": "https://ai.nothinginfinity.com",
+  "business_type": "AI automation and digital strategy agency",
+  "business_description": "Nothing Infinity is an AI-first digital agency that helps businesses deploy AI automation, agent-first content systems, and structured machine-readable identity layers (AFO) to improve visibility in AI-powered search and agent discovery environments.",
+  "target_audience": "Business owners, marketing directors, and digital agencies who want to be found and accurately represented by AI systems, LLMs, and agent-based search tools",
+  "services": [
+    "AFO (Agent-First Optimization) install",
+    "Parallel Internet Site design and deployment",
+    "AI visibility audit",
+    "Prompt test monitoring and reporting",
+    "Agent-first content strategy",
+    "LLM entity profile setup"
+  ],
+  "primary_cta": "Start Your AFO Install",
+  "cta_url": "https://nothinginfinity.com/start",
+  "contact_name": "Jared",
+  "contact_email": "hello@nothinginfinity.com",
+  "phone": "",
+  "service_area": "United States (remote)",
+  "business_hours": "By appointment",
+  "founding_year": "2024",
+  "clients_served": "Early-access clients across financial services, professional services, and e-commerce",
+  "positioning_statement": "Nothing Infinity helps businesses build a structured, public, agent-readable identity layer so AI systems can find, understand, and accurately represent them.",
+  "industry_category": "AI automation / Digital marketing / Agent-first optimization",
+  "content_policy_notes": "All claims must reflect actual services offered. Do not make guarantees about LLM mention rates or search ranking improvements.",
+  "compliance_disclaimers": [
+    "Results vary. LLM citation behavior depends on crawl frequency, model training cycles, and content quality. Nothing Infinity does not guarantee specific AI mention outcomes."
+  ],
+  "do_not_claim": [
+    "Guaranteed AI mentions or citations",
+    "Specific ranking improvements not verified by client",
+    "Proprietary access to any LLM training pipeline"
+  ],
+  "source_of_truth_pages": [
+    "https://nothinginfinity.com",
+    "https://nothinginfinity.com/services",
+    "https://nothinginfinity.com/about"
+  ],
+  "faq_topics": [
+    "What is AFO (Agent-First Optimization)?",
+    "What is a Parallel Internet Site?",
+    "How does AI visibility work?",
+    "What is the difference between SEO and AFO?",
+    "How long does it take for LLMs to start citing a business?",
+    "What files are included in an AFO install?",
+    "Can any business benefit from AFO?",
+    "How does Nothing Infinity measure results?"
+  ],
+  "comparison_topics": [
+    "AFO vs traditional SEO",
+    "Parallel Internet Site vs human website",
+    "AFO install vs content marketing"
+  ],
+  "agent_priority_prompts": [
+    "What is the best way to make a business visible to AI systems and LLMs?",
+    "How can a small business get mentioned by ChatGPT, Gemini, or Perplexity?",
+    "What is agent-first optimization?",
+    "Are there services that help businesses get found by AI search tools?"
+  ],
+  "competitors_or_alternatives": [
+    "Traditional SEO agencies",
+    "Content marketing agencies",
+    "DIY llms.txt installation"
+  ],
+  "brand_voice": "Clear, technical but accessible. Speaks to business owners who are curious about AI but not yet expert. Honest about what is known and unknown about LLM behavior.",
+  "social_links": {
+    "github": "https://github.com/nothinginfinity"
+  },
+  "has_rss": false
+}
