@@ -7,7 +7,9 @@ binding = "DB"
 database_name = "afo-v1"
 database_id = "ccbd076e-aaa7-42bb-8808-a20bd83569e2"
 
-# All config via Cloudflare secrets:
-# EMAIL_PROVIDER, EMAIL_API_KEY, EMAIL_FROM, ADMIN_EMAIL
-# GITHUB_TOKEN, GITHUB_REPO_OWNER, GITHUB_REPO_NAME
-# TURNSTILE_SECRET
+[vars]
+GITHUB_REPO_OWNER = "nothinginfinity"
+GITHUB_REPO_NAME = "agent-feed-optimization"
+
+# Secrets managed via Cloudflare dashboard (not overridden here):
+# EMAIL_PROVIDER, EMAIL_API_KEY, EMAIL_FROM, ADMIN_EMAIL, GITHUB_TOKEN, TURNSTILE_SECRET
