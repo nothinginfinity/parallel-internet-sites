@@ -1,8 +1,8 @@
 /**
  * visibility-snapshot.js — POST /api/visibility-snapshot handler
  *
- * Commit 7: Route stub with full validation, Turnstile, and rate limiting.
- * Cheap website checks + prompt generation will be wired in Commit 8.
+ * Commit 8: cheap website checks + real scoring wired in.
+ * rate-limit.js, prompt-generator.js, website-checker.js all imported.
  *
  * This file is intentionally separate from index.js so the existing
  * /api/audit-signup handler is never touched.
@@ -10,6 +10,7 @@
 
 import { checkRateLimit, ensureRateLimitTable, getClientIP, extractDomain } from './rate-limit.js';
 import { generatePrompts } from './prompt-generator.js';
+import { runWebsiteChecks, scoreBand } from './website-checker.js';
 
 const REQUIRED_FIELDS = [
   'name', 'email', 'website_url', 'business_name',
@@ -22,7 +23,7 @@ const REQUIRED_FIELDS = [
  * @param {object} env  — Cloudflare Worker bindings
  */
 export async function handleVisibilitySnapshot(request, env) {
-  // ── 1. Parse body ──────────────────────────────────────────────────────────
+  // ── 1. Parse body ────────────────────────────────────────────────────────
   let body;
   try {
     body = await request.json();
@@ -30,7 +31,7 @@ export async function handleVisibilitySnapshot(request, env) {
     return jsonError('Invalid JSON body', 400);
   }
 
-  // ── 2. Required field validation ───────────────────────────────────────────
+  // ── 2. Required field validation ─────────────────────────────────────────
   for (const field of REQUIRED_FIELDS) {
     if (!body[field] || String(body[field]).trim() === '') {
       return jsonError(`Missing required field: ${field}`, 400);
@@ -42,39 +43,27 @@ export async function handleVisibilitySnapshot(request, env) {
     return jsonError('Invalid email address', 400);
   }
 
-  // ── 3. Normalize website URL ───────────────────────────────────────────────
+  // ── 3. Normalize website URL ─────────────────────────────────────────────
   let websiteUrl = String(body.website_url).trim();
-  if (!/^https?:\/\//i.test(websiteUrl)) {
-    websiteUrl = 'https://' + websiteUrl;
-  }
+  if (!/^https?:\/\//i.test(websiteUrl)) websiteUrl = 'https://' + websiteUrl;
   try { new URL(websiteUrl); }
   catch { return jsonError('Invalid website_url', 400); }
 
-  // ── 4. Turnstile verification ──────────────────────────────────────────────
+  // ── 4. Turnstile verification ────────────────────────────────────────────
   const skipTurnstile =
     !env.TURNSTILE_SECRET ||
     env.TURNSTILE_SECRET === 'SKIP_IN_DEV' ||
     body.cf_turnstile_response === 'SKIP';
 
   if (!skipTurnstile) {
-    if (!body.cf_turnstile_response) {
-      return jsonError('Missing Turnstile token', 400);
-    }
-    const tsResult = await verifyTurnstile(
-      body.cf_turnstile_response, env.TURNSTILE_SECRET
-    );
-    if (!tsResult.success) {
-      return jsonError('Turnstile verification failed', 403);
-    }
+    if (!body.cf_turnstile_response) return jsonError('Missing Turnstile token', 400);
+    const tsResult = await verifyTurnstile(body.cf_turnstile_response, env.TURNSTILE_SECRET);
+    if (!tsResult.success) return jsonError('Turnstile verification failed', 403);
   }
 
-  // ── 5. Rate limiting (D1-backed, no KV needed) ─────────────────────────────
-  try {
-    await ensureRateLimitTable(env.DB);
-  } catch (err) {
-    console.error('[SNAPSHOT] ensureRateLimitTable failed:', err.message);
-    // Non-fatal — don't block the user if table creation fails on first run
-  }
+  // ── 5. Rate limiting ─────────────────────────────────────────────────────
+  try { await ensureRateLimitTable(env.DB); }
+  catch (err) { console.error('[SNAPSHOT] ensureRateLimitTable failed:', err.message); }
 
   const ip     = getClientIP(request);
   const domain = extractDomain(websiteUrl);
@@ -84,7 +73,7 @@ export async function handleVisibilitySnapshot(request, env) {
     rateResult = await checkRateLimit(env.DB, { ip, email, domain });
   } catch (err) {
     console.error('[SNAPSHOT] Rate limit check failed:', err.message);
-    rateResult = { allowed: true }; // Fail open if D1 is down
+    rateResult = { allowed: true };
   }
 
   if (!rateResult.allowed) {
@@ -101,7 +90,7 @@ export async function handleVisibilitySnapshot(request, env) {
     );
   }
 
-  // ── 6. Collect form fields ─────────────────────────────────────────────────
+  // ── 6. Collect form fields ───────────────────────────────────────────────
   const name             = String(body.name).trim();
   const businessName     = String(body.business_name).trim();
   const businessCategory = String(body.business_category).trim();
@@ -110,45 +99,47 @@ export async function handleVisibilitySnapshot(request, env) {
   const idealCustomer    = body.ideal_customer ? String(body.ideal_customer).trim() : '';
   const requestedFull    = body.requested_full_audit === true || body.requested_full_audit === 'true';
 
-  // ── 7. Cheap website checks (Commit 8 will fill this in) ──────────────────
-  // Stub: all checks return false until the checker module is wired.
-  const snapshotChecks = {
-    reachable:          false,
-    robots_txt:         false,
-    sitemap_xml:        false,
-    llms_txt:           false,
-    agent_context:      false,
-    sitemap_agent:      false,
-    title_present:      false,
-    meta_description:   false,
-    json_ld:            false,
-    contact_detectable: false,
-  };
+  // ── 7. Run cheap website checks ─────────────────────────────────────────
+  let snapshotChecks, snapshotScore, scoreBreakdown, band;
+  try {
+    const result = await runWebsiteChecks(websiteUrl);
+    snapshotChecks  = result.checks;
+    snapshotScore   = result.score;
+    scoreBreakdown  = result.scoreBreakdown;
+    band            = scoreBand(snapshotScore);
+  } catch (err) {
+    console.error('[SNAPSHOT] runWebsiteChecks failed:', err.message);
+    // Fail gracefully — return zero score rather than a 500
+    snapshotChecks = {
+      reachable: false, robots_txt: false, sitemap_xml: false, llms_txt: false,
+      agent_context: false, sitemap_agent: false, title_present: false,
+      meta_description: false, json_ld: false, contact_detectable: false,
+    };
+    snapshotScore  = 0;
+    scoreBreakdown = {};
+    band           = scoreBand(0);
+  }
 
-  // ── 8. Score calculation (Commit 8 will return real values) ───────────────
-  const snapshotScore = 0; // placeholder
-
-  // ── 9. Prompt generation ───────────────────────────────────────────────────
+  // ── 8. Prompt generation ─────────────────────────────────────────────────
   let prompts = [];
   try {
     const promptResult = generatePrompts({
-      business_name:       businessName,
-      business_category:   businessCategory,
+      business_name:        businessName,
+      business_category:    businessCategory,
       city_or_service_area: cityOrArea,
-      top_services:        topServices,
-      ideal_customer:      idealCustomer,
+      top_services:         topServices,
+      ideal_customer:       idealCustomer,
     });
     prompts = promptResult.prompts;
   } catch (err) {
     console.error('[SNAPSHOT] generatePrompts failed:', err.message);
   }
 
-  // ── 10. Persist snapshot to D1 ────────────────────────────────────────────
+  // ── 9. Persist snapshot to D1 ────────────────────────────────────────────
   const snapshotId = crypto.randomUUID();
-  const now = new Date().toISOString();
+  const now        = new Date().toISOString();
 
   try {
-    // Upsert customer (reuse pattern from audit-signup)
     const existing = await env.DB.prepare(
       'SELECT id FROM customers WHERE email = ?'
     ).bind(email).first();
@@ -164,10 +155,6 @@ export async function handleVisibilitySnapshot(request, env) {
       ).bind(customerId, email, name, businessName, now).run();
     }
 
-    // Insert snapshot row
-    // Note: snapshot_scores, snapshot_json, generated_prompts_json are new columns
-    // added by the Commit 2 D1 migration. If migration hasn't run yet, this will
-    // gracefully fail and return an error — run migration first.
     await env.DB.prepare(`
       INSERT INTO visibility_snapshots (
         id, customer_id, customer_email, business_name, website_url,
@@ -186,38 +173,50 @@ export async function handleVisibilitySnapshot(request, env) {
     ).run();
   } catch (err) {
     console.error('[SNAPSHOT] D1 insert failed:', err.message);
-    // Return error — don't silently swallow DB failures
     return jsonError('Failed to save snapshot. Please try again.', 500);
   }
 
-  // ── 11. Optional GitHub issue if full audit requested ────────────────────
+  // ── 10. Optional GitHub issue if full audit requested ────────────────────
   let githubResult = null;
   if (requestedFull && env.GITHUB_TOKEN) {
     githubResult = await createSnapshotIssue(env, {
       snapshotId, name, email, businessName, websiteUrl,
       businessCategory, cityOrArea, topServices,
+      snapshotScore, band,
     });
   }
 
-  // ── 12. Respond — redirect URL to results page ───────────────────────────
+  // ── 11. Build results redirect URL ───────────────────────────────────────
+  const passedKeys = Object.entries(snapshotChecks)
+    .filter(([, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+
   const resultParams = new URLSearchParams({
-    snapshot_id:       snapshotId,
-    business_name:     businessName,
-    website_url:       websiteUrl,
-    score:             String(snapshotScore),
-    business_category: businessCategory,
-    city:              cityOrArea,
-    services:          topServices,
-    ideal_customer:    idealCustomer,
+    snapshot_id:          snapshotId,
+    business_name:        businessName,
+    website_url:          websiteUrl,
+    score:                String(snapshotScore),
+    checks:               passedKeys,
+    business_category:    businessCategory,
+    city:                 cityOrArea,
+    services:             topServices,
+    ideal_customer:       idealCustomer,
     requested_full_audit: requestedFull ? '1' : '0',
   });
 
   return new Response(
     JSON.stringify({
-      ok: true,
-      snapshot_id: snapshotId,
-      results_url: `/results?${resultParams.toString()}`,
-      _debug: { github: githubResult },
+      ok:           true,
+      snapshot_id:  snapshotId,
+      score:        snapshotScore,
+      band:         band.label,
+      results_url:  `/results?${resultParams.toString()}`,
+      _debug: {
+        checks:         snapshotChecks,
+        score_breakdown: scoreBreakdown,
+        github:         githubResult,
+      },
     }),
     {
       status: 200,
@@ -229,7 +228,7 @@ export async function handleVisibilitySnapshot(request, env) {
   );
 }
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function jsonError(message, status = 400) {
   return new Response(
@@ -255,13 +254,13 @@ async function verifyTurnstile(token, secret) {
 
 async function createSnapshotIssue(env, {
   snapshotId, name, email, businessName, websiteUrl,
-  businessCategory, cityOrArea, topServices,
+  businessCategory, cityOrArea, topServices, snapshotScore, band,
 }) {
   const owner = env.GITHUB_REPO_OWNER || 'nothinginfinity';
   const repo  = env.GITHUB_REPO_NAME  || 'agent-feed-optimization';
-  const title = `[SNAPSHOT-FULL-REQUEST] ${businessName}`;
-  const body = [
-    `## Full Audit Requested via Free Snapshot`,
+  const title = `[SNAPSHOT-FULL-REQUEST] ${businessName} — Score: ${snapshotScore} ${band.emoji}`;
+  const issueBody = [
+    `## Full Audit Requested via Free Visibility Snapshot`,
     ``,
     `| Field | Value |`,
     `|---|---|`,
@@ -272,6 +271,7 @@ async function createSnapshotIssue(env, {
     `| **Category** | ${businessCategory} |`,
     `| **Service Area** | ${cityOrArea} |`,
     `| **Services** | ${topServices} |`,
+    `| **Snapshot Score** | ${snapshotScore}/100 — ${band.label} ${band.emoji} |`,
     `| **Snapshot ID** | ${snapshotId} |`,
     ``,
     `**Next step:** Jared reviews, then Alice converts to a paid audit job.`,
@@ -289,11 +289,7 @@ async function createSnapshotIssue(env, {
           'User-Agent': 'afo-audit-worker/1.0',
           'X-GitHub-Api-Version': '2022-11-28',
         },
-        body: JSON.stringify({
-          title,
-          body,
-          labels: ['snapshot-full-request'],
-        }),
+        body: JSON.stringify({ title, body: issueBody, labels: ['snapshot-full-request'] }),
       }
     );
     const data = await res.json();
