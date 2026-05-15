@@ -1,21 +1,54 @@
 /**
  * Cloudflare Worker — POST /api/audit-signup
  * AFO v1 dogfood launch. No payment. Founder coupons only.
- *
- * Bindings required (wrangler.toml):
- *   DB          — Cloudflare D1 database
- *   TURNSTILE_SECRET — Cloudflare Turnstile secret key (env var / secret)
- *   EMAIL_PROVIDER  — "resend" | "sendgrid" | "log" (default: "log")
- *   EMAIL_API_KEY   — provider API key (secret)
- *   EMAIL_FROM      — verified sender address
- *   ADMIN_EMAIL     — Jared notification address
- *   GITHUB_TOKEN    — fine-grained PAT, Issues read/write on agent-feed-optimization
- *   GITHUB_REPO_OWNER — nothinginfinity
- *   GITHUB_REPO_NAME  — agent-feed-optimization
  */
 
 const VALID_COUPONS = ['AFO-FOUNDER', 'AFO-DOGFOOD'];
 const REQUIRED_FIELDS = ['name', 'email', 'business_name', 'website_url'];
+
+const TEST_PAGE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFO Worker Test</title>
+<style>
+  body { font-family: -apple-system, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+  button { background: #0070f3; color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; width: 100%; cursor: pointer; margin-top: 12px; }
+  pre { background: #1a1a1a; color: #0f0; padding: 16px; border-radius: 8px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; margin-top: 16px; min-height: 60px; }
+</style>
+</head>
+<body>
+<h2>AFO Worker Test</h2>
+<p>Fires a POST to /api/audit-signup with founder coupon.</p>
+<button onclick="runTest()">🚀 Send Test Signup</button>
+<pre id="out">Result will appear here…</pre>
+<script>
+async function runTest() {
+  const out = document.getElementById('out');
+  out.textContent = 'Sending…';
+  try {
+    const res = await fetch('/api/audit-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Jared Test',
+        email: 'getfitdoc@me.com',
+        business_name: 'AFO Test Co',
+        website_url: 'agentfeedoptimization.com',
+        coupon_code: 'AFO-FOUNDER',
+        cf_turnstile_response: 'SKIP'
+      })
+    });
+    const data = await res.json();
+    out.textContent = JSON.stringify(data, null, 2);
+  } catch(e) {
+    out.textContent = 'Error: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>`;
 
 export default {
   async fetch(request, env) {
@@ -24,6 +57,11 @@ export default {
     // Health check
     if (url.pathname === '/api/health' && request.method === 'GET') {
       return json({ ok: true, version: 'afo-v1' });
+    }
+
+    // Test page — DEV ONLY, remove before public launch
+    if (url.pathname === '/test' && request.method === 'GET') {
+      return new Response(TEST_PAGE, { headers: { 'Content-Type': 'text/html' } });
     }
 
     if (url.pathname === '/api/audit-signup' && request.method === 'POST') {
@@ -42,31 +80,27 @@ async function handleAuditSignup(request, env) {
     return json({ ok: false, error: 'Invalid JSON body' }, 400);
   }
 
-  // --- 1. Validate required fields ---
   for (const field of REQUIRED_FIELDS) {
     if (!body[field] || String(body[field]).trim() === '') {
       return json({ ok: false, error: `Missing required field: ${field}` }, 400);
     }
   }
 
-  // --- 2. Validate email ---
   const email = String(body.email).trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return json({ ok: false, error: 'Invalid email address' }, 400);
   }
 
-  // --- 3. Normalize website_url ---
   let websiteUrl = String(body.website_url).trim();
   if (!/^https?:\/\//i.test(websiteUrl)) {
     websiteUrl = 'https://' + websiteUrl;
   }
   try {
-    new URL(websiteUrl); // throws if malformed
+    new URL(websiteUrl);
   } catch {
     return json({ ok: false, error: 'Invalid website_url' }, 400);
   }
 
-  // --- 4. Turnstile verification ---
   if (env.TURNSTILE_SECRET && env.TURNSTILE_SECRET !== 'SKIP_IN_DEV') {
     const tsToken = body.cf_turnstile_response;
     if (!tsToken) {
@@ -78,12 +112,10 @@ async function handleAuditSignup(request, env) {
     }
   }
 
-  // --- 5. Coupon validation ---
   const couponRaw = body.coupon_code ? String(body.coupon_code).trim().toUpperCase() : null;
   const couponValid = couponRaw ? VALID_COUPONS.includes(couponRaw) : false;
   const plan = couponValid ? 'founder_free' : 'audit_only_v1';
 
-  // --- 6. Upsert customer ---
   const name = String(body.name).trim();
   const businessName = String(body.business_name).trim();
   const role = body.role ? String(body.role).trim() : null;
@@ -103,7 +135,6 @@ async function handleAuditSignup(request, env) {
     launchPhase,
   });
 
-  // --- 7. Log coupon redemption ---
   if (couponRaw) {
     await logCouponRedemption(env.DB, {
       customerId: customer.id,
@@ -112,10 +143,7 @@ async function handleAuditSignup(request, env) {
     });
   }
 
-  // --- 8. Send emails ---
   await sendEmails(env, { email, name, businessName, websiteUrl, plan, auditRequestId: auditRequest.id });
-
-  // --- 9. Create GitHub issue ---
   await createGitHubIssue(env, { email, name, businessName, websiteUrl, plan, couponCode: couponRaw, auditRequestId: auditRequest.id });
 
   return json({
@@ -125,8 +153,6 @@ async function handleAuditSignup(request, env) {
     plan,
   });
 }
-
-// --- Helpers ---
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -194,7 +220,6 @@ async function sendEmails(env, { email, name, businessName, websiteUrl, plan, au
     await sendSendGrid(env, { to: email, subject: confirmationSubject, text: confirmationText });
     await sendSendGrid(env, { to: env.ADMIN_EMAIL, subject: adminSubject, text: adminText });
   } else {
-    // 'log' mode — dev/staging only
     console.log('[EMAIL LOG] To customer:', JSON.stringify({ to: email, subject: confirmationSubject }));
     console.log('[EMAIL LOG] To admin:', JSON.stringify({ to: env.ADMIN_EMAIL, subject: adminSubject }));
   }
