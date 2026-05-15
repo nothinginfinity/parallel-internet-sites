@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-15T22:54:00.000Z",
+  "database_id": "35bd927c-9792-81b9-816a-e357c9339d2f",
+  "note_count": 7,
+  "has_more": false,
+  "fortune_decode": "Agent second brain. 7 sessions distilled. Latest: 2026-05-15. Projects: repo-copilot, parallel-internet-sites. Top concepts: AFO-first strategy, visibility-snapshot, prompt-generator, deterministic prompt templates, no-LLM-free-flow.",
+  "notes": [
+    {
+      "title": "archive_block op added to notion-ops",
+      "date": "2026-05-09",
+      "source": "Perplexity",
+      "project": "repo-copilot",
+      "new_concepts": ["archive_block", "notion-ops-soft-delete", "unarchive-support"],
+      "decisions": "Added archive_block op — PATCH /blocks/{id} with archived:true; unarchive boolean supported",
+      "open_questions": "Should we also add a dedicated archive_database alias op for clarity?",
+      "cid": "bob/c2/jared"
+    },
+    {
+      "title": "Cleanup audit — 3 Alice items resolved",
+      "date": "2026-05-09",
+      "source": "Perplexity",
+      "project": "repo-copilot",
+      "new_concepts": ["cleanup-audit", "notion-ops-result-write-verified"],
+      "decisions": "Items 1 and 3 already clean; Item 2 (archive old DB) needs Jared action in Notion",
+      "open_questions": "Should we add archive_database op to notion-ops to avoid future manual Notion steps?",
+      "cid": "bob/c2/jared"
+    },
+    {
+      "title": "Full build order + roadmap + Bob message sent",
+      "date": "2026-05-09",
+      "source": "Perplexity",
+      "project": "repo-copilot",
+      "new_concepts": ["multi-user provisioning", "bootstrap URL pattern", "gist template with placeholders", "provision GitHub Action", "Notion Roadmap DB", "phase-ordered build roadmap"],
+      "decisions": "Space instructions = one bootstrap URL pointing to identity gist, not generated text. Build order finalized across 4 phases. Notion Roadmap DB is next build step.",
+      "open_questions": "Provision Action design: GitHub App vs PAT for multi-user repo forking? space-card backend: serverless function or GitHub Action?",
+      "cid": "alice/c2/jared"
+    },
+    {
+      "title": "Turn-level brain push mandate wired",
+      "date": "2026-05-09",
+      "source": "Perplexity",
+      "project": "repo-copilot",
+      "new_concepts": ["turn as unit of memory", "turn-level brain push", "3-slot tool call budget", "minimum viable turn note", "slot-3 brain push reservation"],
+      "decisions": "Every Alice turn ends with append_note as slot 3. Minimum viable note = title+date+source+cid. Work splits across turns if slot 3 is needed for brain push.",
+      "open_questions": "Bob and Charlie Space instructions need same turn-level mandate.",
+      "cid": "alice/c2/jared"
+    },
+    {
+      "title": "adapter_ref + G-008 ALERT + Charlie slot + notion-ops SKILL Stone + brain.json read primitive",
+      "date": "2026-05-09",
+      "source": "Perplexity",
+      "project": "repo-copilot",
+      "new_concepts": ["adapter_ref", "SKILL Stone self-invocation", "G-008 ALERT type", "BLOCKING/WARNING/INFO severity levels", "ALERT lifecycle", "Charlie agent slot", "export_brain op"],
+      "decisions": "adapter_ref field added to QA.Stone. G-008 ALERT type formalized. Charlie agent slot seeded. notion-ops registered as first live SKILL Stone. brain.json read primitive implemented.",
+      "open_questions": "Three-Agents Demo build not yet started.",
+      "cid": "alice/c2/jared"
+    },
+    {
+      "title": "gitzip hardening + Path A: Agent Notes DB live",
+      "date": "2026-05-09",
+      "source": "Perplexity",
+      "project": "repo-copilot",
+      "new_concepts": ["normalizeSrc", "execFileSync", "zip bomb guard", "create_database op", "append_row op", "append_note op", "G-010 BRAIN gist type", "agent second brain pattern"],
+      "decisions": "Hardened gitzip-push. Added create_database, append_row, append_note to notion-ops. Provisioned Agent Notes DB. append_note is canonical session-end write primitive.",
+      "open_questions": "When to build brain.json read primitive?",
+      "cid": "bob/c1/jared"
+    },
+    {
+      "title": "Commit 5 — prompt-generator.js shipped",
+      "date": "2026-05-15",
+      "source": "Alice",
+      "project": "parallel-internet-sites",
+      "new_concepts": ["deterministic-prompt-generation", "ideal-visibility-prompts", "no-LLM-free-flow", "prompt-template-pattern", "sanitize-then-build"],
+      "decisions": "prompt-generator.js + test file pushed to workers/audit-signup/. 5 prompt types: category_discovery, problem_solution, local_service_area, service_comparison, direct_brand_accuracy. Pure ESM, no external deps, throws on invalid input. Commits 1-5 done. Next: Commit 6 — thank-you/results page.",
+      "open_questions": "Does Commit 6 update an existing results page or create a new one? Jared to confirm.",
+      "cid": "alice/parallel-internet-sites/jared"
+    }
+  ]
+}
