@@ -36,7 +36,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           npm install -g wrangler
-          echo "${{ secrets.GITHUB_TOKEN_AFO }}" | wrangler secret put GITHUB_TOKEN
+          echo "${{ secrets.GIT_HUBTOKEN_AFO }}" | wrangler secret put GITHUB_TOKEN
           echo "${{ secrets.EMAIL_PROVIDER }}" | wrangler secret put EMAIL_PROVIDER
           echo "${{ secrets.EMAIL_API_KEY }}" | wrangler secret put EMAIL_API_KEY
           echo "${{ secrets.EMAIL_FROM }}" | wrangler secret put EMAIL_FROM
