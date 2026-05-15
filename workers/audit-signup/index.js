@@ -3,6 +3,9 @@
  * AFO v1 dogfood launch. No payment. Founder coupons only.
  */
 
+import { generatePrompts } from './prompt-generator.js';
+import { renderResultsPage } from './results-page.js';
+
 const VALID_COUPONS = ['AFO-FOUNDER', 'AFO-DOGFOOD'];
 const REQUIRED_FIELDS = ['name', 'email', 'business_name', 'website_url'];
 
@@ -102,9 +105,84 @@ export default {
       return handleAuditSignup(request, env);
     }
 
+    // Commit 6: Results page — GET /results
+    // Renders a snapshot result from query params (demo/preview mode)
+    // Production: /api/visibility-snapshot will redirect here with a signed snapshot_id
+    if (url.pathname === '/results' && request.method === 'GET') {
+      return handleResultsPage(url);
+    }
+
     return new Response('Not Found', { status: 404 });
   },
 };
+
+// ---------------------------------------------------------------------------
+// GET /results — render snapshot results page
+// ---------------------------------------------------------------------------
+
+function handleResultsPage(url) {
+  const p = url.searchParams;
+
+  const business_name     = p.get('business_name')     || 'Your Business';
+  const website_url       = p.get('website_url')       || '';
+  const snapshot_score    = parseInt(p.get('score') || '0', 10);
+  const snapshot_id       = p.get('snapshot_id')       || '';
+  const requested_full    = p.get('requested_full_audit') === '1';
+
+  // Parse checks from query string: checks=reachable,robots_txt,title_present
+  const checksRaw = p.get('checks') || '';
+  const passedKeys = checksRaw ? checksRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const ALL_CHECK_KEYS = [
+    'reachable', 'robots_txt', 'sitemap_xml', 'llms_txt',
+    'agent_context', 'sitemap_agent', 'title_present',
+    'meta_description', 'json_ld', 'contact_detectable',
+  ];
+  const snapshot_checks = Object.fromEntries(
+    ALL_CHECK_KEYS.map(k => [k, passedKeys.includes(k)])
+  );
+
+  // Generate prompts from query params
+  let prompts = [];
+  let selfTestPlatforms = ['ChatGPT', 'Gemini', 'Claude', 'Perplexity'];
+  let selfTestInstruction = '';
+
+  try {
+    const promptResult = generatePrompts({
+      business_name,
+      business_category: p.get('business_category') || 'Business',
+      city_or_service_area: p.get('city') || 'your area',
+      top_services: p.get('services') || business_name,
+      ideal_customer: p.get('ideal_customer') || '',
+    });
+    prompts = promptResult.prompts;
+    selfTestPlatforms = promptResult.selfTestPlatforms;
+    selfTestInstruction = promptResult.selfTestInstruction;
+  } catch (err) {
+    console.error('[RESULTS] generatePrompts failed:', err.message);
+    // Fail gracefully — still render the page without prompts
+  }
+
+  const html = renderResultsPage({
+    business_name,
+    website_url,
+    snapshot_score,
+    snapshot_checks,
+    prompts,
+    selfTestPlatforms,
+    selfTestInstruction,
+    requested_full_audit: requested_full,
+    snapshot_id,
+  });
+
+  return new Response(html, {
+    status: 200,
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Existing handlers — UNCHANGED
+// ---------------------------------------------------------------------------
 
 async function handleAuditSignup(request, env) {
   let body;
