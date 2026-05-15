@@ -54,12 +54,43 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Health check
     if (url.pathname === '/api/health' && request.method === 'GET') {
       return json({ ok: true, version: 'afo-v1' });
     }
 
-    // Test page — DEV ONLY, remove before public launch
+    // DEV ONLY: diagnose GitHub token
+    if (url.pathname === '/api/gh-check' && request.method === 'GET') {
+      const token = env.GITHUB_TOKEN || '';
+      const tokenPreview = token ? token.slice(0, 8) + '...' + token.slice(-4) : '(empty)';
+      const tokenLength = token.length;
+      const hasWhitespace = /[\s\r\n]/.test(token);
+
+      // Hit the GitHub /user endpoint — works with any valid token
+      let githubStatus = null;
+      let githubBody = null;
+      try {
+        const res = await fetch('https://api.github.com/user', {
+          headers: {
+            Authorization: `Bearer ${token.trim()}`,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+        });
+        githubStatus = res.status;
+        githubBody = await res.text();
+      } catch (err) {
+        githubBody = 'fetch error: ' + err.message;
+      }
+
+      return json({
+        token_preview: tokenPreview,
+        token_length: tokenLength,
+        has_whitespace: hasWhitespace,
+        github_status: githubStatus,
+        github_response: githubBody.slice(0, 300),
+      });
+    }
+
     if (url.pathname === '/test' && request.method === 'GET') {
       return new Response(TEST_PAGE, { headers: { 'Content-Type': 'text/html' } });
     }
@@ -307,14 +338,20 @@ async function createGitHubIssue(env, { email, name, businessName, websiteUrl, p
     const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+        Authorization: `Bearer ${env.GITHUB_TOKEN.trim()}`,
         Accept: 'application/vnd.github+json',
         'Content-Type': 'application/json',
         'X-GitHub-Api-Version': '2022-11-28',
       },
       body: JSON.stringify({ title, body, labels: ['audit-request', 'dogfood-v1'] }),
     });
-    const data = await res.json();
+    const rawText = await res.text();
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      return { ok: false, status: res.status, raw_response: rawText.slice(0, 300) };
+    }
     if (!res.ok) {
       return { ok: false, status: res.status, error: data };
     }
