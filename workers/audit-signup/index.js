@@ -6,6 +6,14 @@
 const VALID_COUPONS = ['AFO-FOUNDER', 'AFO-DOGFOOD'];
 const REQUIRED_FIELDS = ['name', 'email', 'business_name', 'website_url'];
 
+const GH_HEADERS = (token) => ({
+  Authorization: `Bearer ${token.trim()}`,
+  Accept: 'application/vnd.github+json',
+  'Content-Type': 'application/json',
+  'User-Agent': 'afo-audit-worker/1.0',
+  'X-GitHub-Api-Version': '2022-11-28',
+});
+
 const TEST_PAGE = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,16 +73,11 @@ export default {
       const tokenLength = token.length;
       const hasWhitespace = /[\s\r\n]/.test(token);
 
-      // Hit the GitHub /user endpoint — works with any valid token
       let githubStatus = null;
       let githubBody = null;
       try {
         const res = await fetch('https://api.github.com/user', {
-          headers: {
-            Authorization: `Bearer ${token.trim()}`,
-            Accept: 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-          },
+          headers: GH_HEADERS(token),
         });
         githubStatus = res.status;
         githubBody = await res.text();
@@ -337,12 +340,7 @@ async function createGitHubIssue(env, { email, name, businessName, websiteUrl, p
   try {
     const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.GITHUB_TOKEN.trim()}`,
-        Accept: 'application/vnd.github+json',
-        'Content-Type': 'application/json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
+      headers: GH_HEADERS(env.GITHUB_TOKEN),
       body: JSON.stringify({ title, body, labels: ['audit-request', 'dogfood-v1'] }),
     });
     const rawText = await res.text();
