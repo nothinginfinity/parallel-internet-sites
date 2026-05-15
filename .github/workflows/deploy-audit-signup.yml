@@ -28,3 +28,16 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: workers/audit-signup
+
+      - name: Set Worker Secrets
+        working-directory: workers/audit-signup
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm install -g wrangler
+          echo "${{ secrets.GITHUB_TOKEN_AFO }}" | wrangler secret put GITHUB_TOKEN
+          echo "${{ secrets.EMAIL_PROVIDER }}" | wrangler secret put EMAIL_PROVIDER
+          echo "${{ secrets.EMAIL_API_KEY }}" | wrangler secret put EMAIL_API_KEY
+          echo "${{ secrets.EMAIL_FROM }}" | wrangler secret put EMAIL_FROM
+          echo "${{ secrets.ADMIN_EMAIL }}" | wrangler secret put ADMIN_EMAIL
