@@ -1,12 +1,18 @@
 # Alice Inbox
 
-## 🟡 READY FOR COMMIT 2 — AFO Funnel Roadmap Approved
+## 🟡 READY FOR COMMIT 3 — UI Copy + Form Field Updates
 **Date:** 2026-05-15  
-**Status:** Commit 1 complete (roadmap spec). Awaiting Jared approval to proceed to Commit 2.
-**Doc:** `docs/afo-funnel-roadmap-v1.md`
+**Status:** Commit 2 complete (D1 migration SQL). Awaiting Jared to apply migration + approve Commit 3.
 
-**Commit 2 scope:** D1 migration SQL — additive only, no breaking changes.
-- ALTER audit_requests: add business_category, service_area, top_services, ideal_customer, requested_full_audit, audit_status, audit_tier
-- CREATE visibility_snapshots table
+### Before proceeding to Commit 3, Jared must:
+1. Apply the migration to the live D1 database:
+   ```bash
+   wrangler d1 execute <DB_NAME> --file=db/migrations/002_visibility_snapshot_fields.sql
+   ```
+2. Verify the new table exists:
+   ```bash
+   wrangler d1 execute <DB_NAME> --command="PRAGMA table_info(visibility_snapshots);"
+   ```
+3. Confirm and say "proceed with Commit 3"
 
-Say "proceed with Commit 2" to start.
+**Commit 3 scope:** UI copy updates + new form fields on the public snapshot form. No backend changes.
