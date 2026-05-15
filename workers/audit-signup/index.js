@@ -122,35 +122,48 @@ async function handleAuditSignup(request, env) {
   const source = body.source || 'afo_site';
   const launchPhase = body.launch_phase || 'dogfood_v1';
 
-  const customer = await upsertCustomer(env.DB, { email, name, businessName, role });
-  const auditRequest = await createAuditRequest(env.DB, {
-    customerId: customer.id,
-    customerEmail: email,
-    customerName: name,
-    businessName,
-    websiteUrl,
-    couponCode: couponRaw,
-    plan,
-    source,
-    launchPhase,
-  });
-
-  if (couponRaw) {
-    await logCouponRedemption(env.DB, {
+  let customer, auditRequest;
+  try {
+    customer = await upsertCustomer(env.DB, { email, name, businessName, role });
+    auditRequest = await createAuditRequest(env.DB, {
       customerId: customer.id,
-      auditRequestId: auditRequest.id,
+      customerEmail: email,
+      customerName: name,
+      businessName,
+      websiteUrl,
       couponCode: couponRaw,
+      plan,
+      source,
+      launchPhase,
     });
+  } catch (err) {
+    return json({ ok: false, error: 'DB error', detail: err.message }, 500);
   }
 
-  await sendEmails(env, { email, name, businessName, websiteUrl, plan, auditRequestId: auditRequest.id });
-  await createGitHubIssue(env, { email, name, businessName, websiteUrl, plan, couponCode: couponRaw, auditRequestId: auditRequest.id });
+  if (couponRaw) {
+    try {
+      await logCouponRedemption(env.DB, {
+        customerId: customer.id,
+        auditRequestId: auditRequest.id,
+        couponCode: couponRaw,
+      });
+    } catch (err) {
+      console.error('[COUPON] Redemption log failed:', err.message);
+    }
+  }
+
+  const emailResult = await sendEmails(env, { email, name, businessName, websiteUrl, plan, auditRequestId: auditRequest.id });
+  const githubResult = await createGitHubIssue(env, { email, name, businessName, websiteUrl, plan, couponCode: couponRaw, auditRequestId: auditRequest.id });
 
   return json({
     ok: true,
     message: 'Audit request received.',
     audit_request_id: auditRequest.id,
     plan,
+    _debug: {
+      email: emailResult,
+      github: githubResult,
+    },
   });
 }
 
@@ -214,42 +227,62 @@ async function sendEmails(env, { email, name, businessName, websiteUrl, plan, au
   const adminText = `New audit signup received.\n\nName: ${name}\nEmail: ${email}\nBusiness: ${businessName}\nWebsite: ${websiteUrl}\nPlan: ${plan}\nRequest ID: ${auditRequestId}`;
 
   if (provider === 'resend') {
-    await sendResend(env, { to: email, subject: confirmationSubject, text: confirmationText });
-    await sendResend(env, { to: env.ADMIN_EMAIL, subject: adminSubject, text: adminText });
+    const r1 = await sendResend(env, { to: email, subject: confirmationSubject, text: confirmationText });
+    const r2 = await sendResend(env, { to: env.ADMIN_EMAIL, subject: adminSubject, text: adminText });
+    return { provider: 'resend', confirmation: r1, admin: r2 };
   } else if (provider === 'sendgrid') {
-    await sendSendGrid(env, { to: email, subject: confirmationSubject, text: confirmationText });
-    await sendSendGrid(env, { to: env.ADMIN_EMAIL, subject: adminSubject, text: adminText });
+    const r1 = await sendSendGrid(env, { to: email, subject: confirmationSubject, text: confirmationText });
+    const r2 = await sendSendGrid(env, { to: env.ADMIN_EMAIL, subject: adminSubject, text: adminText });
+    return { provider: 'sendgrid', confirmation: r1, admin: r2 };
   } else {
     console.log('[EMAIL LOG] To customer:', JSON.stringify({ to: email, subject: confirmationSubject }));
     console.log('[EMAIL LOG] To admin:', JSON.stringify({ to: env.ADMIN_EMAIL, subject: adminSubject }));
+    return { provider: 'log' };
   }
 }
 
 async function sendResend(env, { to, subject, text }) {
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${env.EMAIL_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: env.EMAIL_FROM, to, subject, text }),
-  });
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${env.EMAIL_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: env.EMAIL_FROM, to, subject, text }),
+    });
+    const body = await res.json();
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: body };
+    }
+    return { ok: true, id: body.id };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 }
 
 async function sendSendGrid(env, { to, subject, text }) {
-  await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${env.EMAIL_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: to }] }],
-      from: { email: env.EMAIL_FROM },
-      subject,
-      content: [{ type: 'text/plain', value: text }],
-    }),
-  });
+  try {
+    const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${env.EMAIL_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: to }] }],
+        from: { email: env.EMAIL_FROM },
+        subject,
+        content: [{ type: 'text/plain', value: text }],
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      return { ok: false, status: res.status, error: body };
+    }
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 }
 
 async function createGitHubIssue(env, { email, name, businessName, websiteUrl, plan, couponCode, auditRequestId }) {
   if (!env.GITHUB_TOKEN) {
-    console.log('[GITHUB] No token configured, skipping issue creation.');
-    return;
+    return { ok: false, error: 'No GITHUB_TOKEN configured' };
   }
   const owner = env.GITHUB_REPO_OWNER || 'nothinginfinity';
   const repo = env.GITHUB_REPO_NAME || 'agent-feed-optimization';
@@ -270,18 +303,24 @@ async function createGitHubIssue(env, { email, name, businessName, websiteUrl, p
     `**Next step:** Alice converts this to \`agent-feed-optimization/jobs/YYYY-MM-DD-${slugify(businessName)}/job.json\` after Jared approves.`,
   ].join('\n');
 
-  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.GITHUB_TOKEN}`,
-      Accept: 'application/vnd.github+json',
-      'Content-Type': 'application/json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-    body: JSON.stringify({ title, body, labels: ['audit-request', 'dogfood-v1'] }),
-  });
-  if (!res.ok) {
-    console.error('[GITHUB] Issue creation failed:', res.status, await res.text());
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      body: JSON.stringify({ title, body, labels: ['audit-request', 'dogfood-v1'] }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: data };
+    }
+    return { ok: true, issue_number: data.number, url: data.html_url };
+  } catch (err) {
+    return { ok: false, error: err.message };
   }
 }
 
