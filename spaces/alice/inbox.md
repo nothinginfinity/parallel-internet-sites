@@ -1,33 +1,33 @@
 # Alice Inbox
 
-## 🟡 READY FOR COMMIT 5 — Results / thank-you page
+## 🟡 READY FOR COMMIT 6 — Rate limiting / abuse controls
 **Date:** 2026-05-15  
-**Status:** Commits 1–4 + 4b complete. Worker code and deploy workflow are live on main.
+**Status:** Commits 1–5 complete. Full snapshot form + results page live. Awaiting Commit 6 approval.
 
-### Commit 4b delivered:
-- `.github/workflows/deploy-visibility-snapshot.yml`
-  - Mirrors deploy-audit-signup.yml exactly
-  - Triggers on push to `workers/visibility-snapshot/**` or manual workflow_dispatch
-  - Deploys via `cloudflare/wrangler-action@v3`
-  - Sets `TURNSTILE_SECRET` from `secrets.TURNSTILE_SECRET` GitHub repo secret
-  - Uses existing `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` secrets
-
-### One manual step before first deploy:
-Add `TURNSTILE_SECRET` as a GitHub repo secret:
-1. Go to github.com/nothinginfinity/parallel-internet-sites/settings/secrets/actions
-2. Click "New repository secret"
-3. Name: `TURNSTILE_SECRET`
-4. Value: your Cloudflare Turnstile **secret** key (from dash.cloudflare.com → Turnstile)
-5. Save — then trigger the workflow via Actions → Deploy visibility-snapshot Worker → Run workflow
-
-### Commit 5 scope:
-- `workers/visibility-snapshot/results.html`
-  - Score badge (0–100) with A–F grade + colour
-  - Check-by-check results list (pass/fail)
+### Commit 5 delivered:
+- `workers/visibility-snapshot/results.html` — full results page:
+  - Animated score ring (0–100) with A–F grade badge + colour coding
+  - Animated score bar
+  - 10-point check breakdown (pass/fail with points)
   - 5 Ideal Visibility Prompts with one-tap copy buttons
-  - Self-test instructions for ChatGPT, Gemini, Claude, Perplexity
-  - CTA to book a call / request full audit
-- No Worker changes
+  - Self-test links to ChatGPT, Gemini, Claude, Perplexity
+  - “What good looks like” personalised ideal response example
+  - CTA card: book a call (or “audit requested” state if checkbox was checked)
+  - Reads result from sessionStorage (set by form on successful POST)
+- `workers/audit-signup/snapshot-form.html` — updated:
+  - On success: stores result in sessionStorage + redirects to results.html
+  - Passes _meta (business_name, city, services) through for results page personalisation
 
-### Before Commit 5:
-No manual steps needed. Just say "proceed with Commit 5."
+### Commit 6 scope (next):
+Docs update — free vs paid audit boundary definition:
+- `docs/afo-product-tiers.md`
+  - Free Snapshot tier spec
+  - Paid Basic tier spec
+  - Pro Install tier spec
+  - Growth / Monitoring tier spec
+  - Sales boundary rules (what triggers upsell)
+
+Note: Rate limiting is already built into the Worker (Commit 4). Commit 6 is docs only per the roadmap.
+
+### Before Commit 6:
+No manual steps required. Just say “proceed with Commit 6.”

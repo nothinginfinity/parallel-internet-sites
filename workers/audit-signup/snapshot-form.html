@@ -14,255 +14,108 @@
       min-height: 100vh;
       padding: 2rem 1rem;
     }
-    .container {
-      max-width: 640px;
-      margin: 0 auto;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
+    .container { max-width: 640px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 2.5rem; }
     .header .eyebrow {
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #01696f;
-      margin-bottom: 0.75rem;
+      font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #01696f; margin-bottom: 0.75rem;
     }
     .header h1 {
-      font-size: clamp(1.5rem, 4vw, 2.25rem);
-      font-weight: 700;
-      line-height: 1.2;
-      color: #28251d;
-      margin-bottom: 1rem;
+      font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700;
+      line-height: 1.2; color: #28251d; margin-bottom: 1rem;
     }
-    .header p {
-      font-size: 1rem;
-      color: #7a7974;
-      max-width: 480px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
+    .header p { font-size: 1rem; color: #7a7974; max-width: 480px; margin: 0 auto; line-height: 1.6; }
     .what-you-get {
-      background: #fff;
-      border: 1px solid #dcd9d5;
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+      background: #fff; border: 1px solid #dcd9d5; border-radius: 0.75rem;
+      padding: 1.5rem; margin-bottom: 2rem;
     }
     .what-you-get h2 {
-      font-size: 0.875rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: #7a7974;
-      margin-bottom: 1rem;
+      font-size: 0.875rem; font-weight: 600; letter-spacing: 0.05em;
+      text-transform: uppercase; color: #7a7974; margin-bottom: 1rem;
     }
-    .what-you-get ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-    .what-you-get li {
-      font-size: 0.95rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
-    .what-you-get li::before {
-      content: '✓';
-      color: #01696f;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 0.05rem;
-    }
+    .what-you-get ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .what-you-get li { font-size: 0.95rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+    .what-you-get li::before { content: '✓'; color: #01696f; font-weight: 700; flex-shrink: 0; margin-top: 0.05rem; }
     form {
-      background: #fff;
-      border: 1px solid #dcd9d5;
-      border-radius: 0.75rem;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
+      background: #fff; border: 1px solid #dcd9d5; border-radius: 0.75rem;
+      padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem;
     }
     .form-section-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: #01696f;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #f3f0ec;
-      margin-bottom: 0.25rem;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #01696f;
+      padding-bottom: 0.5rem; border-bottom: 1px solid #f3f0ec; margin-bottom: 0.25rem;
     }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-    label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #28251d;
-    }
-    label .optional {
-      font-weight: 400;
-      color: #bab9b4;
-      font-size: 0.8rem;
-      margin-left: 0.3rem;
-    }
-    input[type="text"],
-    input[type="email"],
-    input[type="url"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 0.625rem 0.75rem;
-      border: 1px solid #d4d1ca;
-      border-radius: 0.5rem;
-      font-size: 0.95rem;
-      color: #28251d;
-      background: #fafaf8;
-      transition: border-color 180ms ease, box-shadow 180ms ease;
-      appearance: none;
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    label { font-size: 0.875rem; font-weight: 500; color: #28251d; }
+    input, textarea, select {
+      width: 100%; padding: 0.625rem 0.75rem; border: 1px solid #d4d1ca;
+      border-radius: 0.5rem; font-size: 0.95rem; color: #28251d; background: #fafaf8;
+      transition: border-color 180ms ease, box-shadow 180ms ease; appearance: none;
     }
     input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: #01696f;
-      box-shadow: 0 0 0 3px rgba(1, 105, 111, 0.12);
-      background: #fff;
+      outline: none; border-color: #01696f; box-shadow: 0 0 0 3px rgba(1,105,111,0.12); background: #fff;
     }
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-      line-height: 1.5;
-    }
-    .hint {
-      font-size: 0.8rem;
-      color: #7a7974;
-      line-height: 1.4;
-    }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .hint { font-size: 0.8rem; color: #7a7974; line-height: 1.4; }
     .checkbox-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.625rem;
-      padding: 1rem;
-      background: #f7f6f2;
-      border: 1px solid #dcd9d5;
-      border-radius: 0.5rem;
+      display: flex; align-items: flex-start; gap: 0.625rem;
+      padding: 1rem; background: #f7f6f2; border: 1px solid #dcd9d5; border-radius: 0.5rem;
     }
-    .checkbox-row input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      margin-top: 0.1rem;
-      flex-shrink: 0;
-      accent-color: #01696f;
-    }
-    .checkbox-row label {
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    .checkbox-row label strong {
-      display: block;
-      margin-bottom: 0.2rem;
-    }
-    .checkbox-row label span {
-      color: #7a7974;
-      font-size: 0.82rem;
-    }
-    .cf-turnstile {
-      margin-top: 0.5rem;
-    }
+    .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; margin-top: 0.1rem; flex-shrink: 0; accent-color: #01696f; }
+    .checkbox-row label { font-size: 0.9rem; cursor: pointer; }
+    .checkbox-row label strong { display: block; margin-bottom: 0.2rem; }
+    .checkbox-row label span { color: #7a7974; font-size: 0.82rem; }
+    .cf-turnstile { margin-top: 0.5rem; }
     .submit-btn {
-      background: #01696f;
-      color: #fff;
-      border: none;
-      border-radius: 0.5rem;
-      padding: 0.875rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 180ms ease, transform 100ms ease;
-      text-align: center;
+      background: #01696f; color: #fff; border: none; border-radius: 0.5rem;
+      padding: 0.875rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: background 180ms ease, transform 100ms ease; text-align: center;
     }
     .submit-btn:hover { background: #0c4e54; }
     .submit-btn:active { transform: scale(0.99); }
     .submit-btn:disabled { background: #bab9b4; cursor: not-allowed; }
-    .privacy-note {
-      text-align: center;
-      font-size: 0.78rem;
-      color: #bab9b4;
-      line-height: 1.5;
-    }
-    .status-msg {
-      padding: 1rem;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
-      display: none;
-    }
-    .status-msg.success {
-      background: #d4dfcc;
-      color: #1e3f0a;
-      border: 1px solid #6daa45;
-      display: block;
-    }
-    .status-msg.error {
-      background: #e0ced7;
-      color: #561740;
-      border: 1px solid #a12c7b;
-      display: block;
-    }
+    .privacy-note { text-align: center; font-size: 0.78rem; color: #bab9b4; line-height: 1.5; }
+    .status-msg { padding: 1rem; border-radius: 0.5rem; font-size: 0.9rem; display: none; }
+    .status-msg.error { background: #e0ced7; color: #561740; border: 1px solid #a12c7b; display: block; }
   </style>
 </head>
 <body>
   <div class="container">
-
     <div class="header">
       <div class="eyebrow">Agent Feed Optimization</div>
       <h1>Get Your Free AFO Visibility Snapshot</h1>
       <p>Find out if your business shows up when your ideal customers ask ChatGPT, Gemini, Claude, or Perplexity — and get the exact prompts to test it yourself.</p>
     </div>
-
     <div class="what-you-get">
       <h2>What you get — free</h2>
       <ul>
-        <li>AI-readiness score (0–100) based on your website's structure</li>
+        <li>AI-readiness score (0–100) based on your website’s structure</li>
         <li>10-point technical checklist (robots.txt, sitemap, llms.txt, JSON-LD, and more)</li>
-        <li>3–5 personalized Ideal Visibility Prompts for your business</li>
+        <li>3–5 personalised Ideal Visibility Prompts for your business</li>
         <li>Self-test instructions for ChatGPT, Gemini, Claude, and Perplexity</li>
-        <li>"What good looks like" — an example of an ideal AI response for your business</li>
+        <li>“What good looks like” — an example of an ideal AI response for your business</li>
       </ul>
     </div>
-
     <form id="snapshotForm" novalidate>
-
       <div class="form-section-label">About you</div>
-
       <div class="field">
         <label for="name">Your name</label>
         <input type="text" id="name" name="name" placeholder="Jane Smith" required autocomplete="name">
       </div>
-
       <div class="field">
         <label for="email">Email address</label>
         <input type="email" id="email" name="email" placeholder="jane@example.com" required autocomplete="email">
-        <span class="hint">We'll send your snapshot results here.</span>
+        <span class="hint">We’ll send your snapshot results here.</span>
       </div>
-
       <div class="form-section-label" style="margin-top:0.5rem">About your business</div>
-
       <div class="field">
         <label for="business_name">Business name</label>
         <input type="text" id="business_name" name="business_name" placeholder="Acme Roofing Co." required>
       </div>
-
       <div class="field">
         <label for="website_url">Website URL</label>
         <input type="url" id="website_url" name="website_url" placeholder="https://yourwebsite.com" required autocomplete="url">
       </div>
-
       <div class="field">
         <label for="business_category">Business category</label>
         <select id="business_category" name="business_category" required>
@@ -281,45 +134,33 @@
           <option value="other">Other</option>
         </select>
       </div>
-
       <div class="field">
         <label for="city_or_service_area">City or service area</label>
         <input type="text" id="city_or_service_area" name="city_or_service_area" placeholder="San Juan Capistrano, CA — or — Southern California" required>
-        <span class="hint">Where do your customers find you? City, region, or "nationwide."</span>
+        <span class="hint">Where do your customers find you? City, region, or “nationwide.”</span>
       </div>
-
       <div class="form-section-label" style="margin-top:0.5rem">What you do</div>
-
       <div class="field">
         <label for="top_services">Top 3 services or products</label>
         <textarea id="top_services" name="top_services" placeholder="e.g. roof replacement, storm damage repair, gutter installation" required></textarea>
         <span class="hint">These become the basis for your Ideal Visibility Prompts.</span>
       </div>
-
       <div class="field">
         <label for="ideal_customer">Who is your ideal customer?</label>
         <textarea id="ideal_customer" name="ideal_customer" placeholder="e.g. homeowners in Orange County who need a roof replacement after storm damage" required></textarea>
         <span class="hint">Be specific — the more detail you give, the more accurate your prompts will be.</span>
       </div>
-
       <div class="checkbox-row">
         <input type="checkbox" id="requested_full_audit" name="requested_full_audit" value="1">
         <label for="requested_full_audit">
           <strong>I want a full AFO audit / discovery call</strong>
-          <span>Check this if you'd like a member of our team to reach out about a complete AFO audit or install package.</span>
+          <span>Check this if you’d like a member of our team to reach out about a complete AFO audit or install package.</span>
         </label>
       </div>
-
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAADPYRx7DcNHsoDzdWvCoapum8l8" data-theme="light"></div>
-
+      <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="light"></div>
       <div class="status-msg" id="statusMsg"></div>
-
-      <button type="submit" class="submit-btn" id="submitBtn">
-        Get My Free Visibility Snapshot →
-      </button>
-
+      <button type="submit" class="submit-btn" id="submitBtn">Get My Free Visibility Snapshot →</button>
       <p class="privacy-note">No spam. No credit card. Your information is used only to generate your snapshot and send you the results.</p>
-
     </form>
   </div>
 
@@ -333,11 +174,17 @@
       btn.disabled = true;
       btn.textContent = 'Running snapshot…';
       msg.className = 'status-msg';
+      msg.style.display = 'none';
 
       const data = {};
       new FormData(form).forEach((v, k) => { data[k] = v; });
-      // checkbox: if unchecked it won't appear in FormData — normalize to 0
       if (!data.requested_full_audit) data.requested_full_audit = '0';
+      // Pass business meta so results page can build ideal response example
+      data._meta = {
+        business_name: data.business_name,
+        city_or_service_area: data.city_or_service_area,
+        top_services: data.top_services
+      };
 
       try {
         const res = await fetch('/api/visibility-snapshot', {
@@ -348,14 +195,16 @@
         const json = await res.json();
 
         if (res.ok) {
-          msg.className = 'status-msg success';
-          msg.textContent = '✓ Snapshot running! Check your email — results will arrive within a minute.';
-          btn.textContent = 'Snapshot requested ✓';
+          // Attach meta for results page personalisation
+          json._meta = data._meta;
+          sessionStorage.setItem('afo_snapshot_result', JSON.stringify(json));
+          window.location.href = './results.html';
         } else {
-          throw new Error(json.error || 'Submission failed');
+          throw new Error(json.error || 'Submission failed. Please try again.');
         }
       } catch (err) {
         msg.className = 'status-msg error';
+        msg.style.display = 'block';
         msg.textContent = '✗ ' + err.message;
         btn.disabled = false;
         btn.textContent = 'Get My Free Visibility Snapshot →';
