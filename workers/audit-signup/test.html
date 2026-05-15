@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFO Worker Test</title>
+<style>
+  body { font-family: -apple-system, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+  button { background: #0070f3; color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; width: 100%; cursor: pointer; margin-top: 12px; }
+  pre { background: #1a1a1a; color: #0f0; padding: 16px; border-radius: 8px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; margin-top: 16px; min-height: 60px; }
+  h2 { margin-bottom: 4px; }
+  p { color: #666; font-size: 14px; }
+</style>
+</head>
+<body>
+<h2>AFO Worker Test</h2>
+<p>Fires a POST to <code>/api/audit-signup</code> with founder coupon.</p>
+<button onclick="runTest()">🚀 Send Test Signup</button>
+<pre id="out">Result will appear here…</pre>
+<script>
+async function runTest() {
+  const out = document.getElementById('out');
+  out.textContent = 'Sending…';
+  try {
+    const res = await fetch('https://afo-audit-signup.jaredtechfit.workers.dev/api/audit-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Jared Test',
+        email: 'getfitdoc@me.com',
+        business_name: 'AFO Test Co',
+        website_url: 'agentfeedoptimization.com',
+        coupon_code: 'AFO-FOUNDER',
+        cf_turnstile_response: 'SKIP'
+      })
+    });
+    const data = await res.json();
+    out.textContent = JSON.stringify(data, null, 2);
+  } catch(e) {
+    out.textContent = 'Error: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
