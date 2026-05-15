@@ -1,30 +1,40 @@
 # Alice Inbox
 
-## 🟡 READY FOR COMMIT 4 — `/api/visibility-snapshot` endpoint
+## 🟡 READY FOR COMMIT 5 — Prompt Generator module + thank-you/results page
 **Date:** 2026-05-15  
-**Status:** Commits 1–3 complete. D1 migration applied by Jared manually via Cloudflare Console. Awaiting approval to build the new Worker endpoint.
+**Status:** Commits 1–4 complete. Awaiting deploy of visibility-snapshot Worker + Commit 5 approval.
 
-### Commit 3 delivered:
-- `workers/audit-signup/snapshot-form.html` — new public-facing AFO Visibility Snapshot form
-  - All 9 form fields per spec (name, email, business_name, website_url, business_category, city_or_service_area, top_services, ideal_customer, requested_full_audit checkbox)
-  - CTA copy: "Get My Free Visibility Snapshot →"
-  - Posts to `/api/visibility-snapshot` (Commit 4)
-  - Turnstile widget wired (sitekey placeholder — swap in before deploy)
-- `workers/audit-signup/test.html` — updated dev QA form
-  - Notice banner pointing to snapshot-form.html
-  - Optional new fields added for dev testing
-  - Still posts to `/api/audit-signup` — no Worker changes
+### Commit 4 delivered:
+- `workers/visibility-snapshot/index.js` — full Worker:
+  - POST /api/visibility-snapshot
+  - Turnstile verification
+  - D1-backed rate limiting (IP + email + domain, 24h window)
+  - 10 concurrent cheap checks (HEAD/fetch, 5–8s timeout each)
+  - 0–100 scoring with A–F grade
+  - 5 deterministic Ideal Visibility Prompts (zero LLM API calls)
+  - Customer resolve-or-create (reuses existing customer record by email)
+  - Snapshot stored in visibility_snapshots table
+- `workers/visibility-snapshot/wrangler.toml` — correct D1 binding (afo-v1)
+- `workers/visibility-snapshot/README.md` — full check/score/prompt reference
 
-### Commit 4 scope:
-New Worker file: `workers/visibility-snapshot/index.js`
-- POST /api/visibility-snapshot
-- Validate all 9 fields
-- Normalize website URL
-- Verify Turnstile
-- Run 10 cheap website checks (HEAD/fetch — no LLM calls)
-- Score 0–100
-- Store in D1 `visibility_snapshots` table
-- Return score + check results to client
+### To deploy Commit 4:
+```bash
+cd workers/visibility-snapshot
+wrangler deploy
+```
+Then set the `TURNSTILE_SECRET` secret:
+```bash
+wrangler secret put TURNSTILE_SECRET
+```
 
-### Before Commit 4:
-No manual steps required. Jared just needs to say "proceed with Commit 4."
+### Commit 5 scope:
+- Thank-you / results page (`workers/visibility-snapshot/results.html`)
+  - Displays score + grade badge
+  - Shows check-by-check results
+  - Renders the 5 Ideal Visibility Prompts with copy buttons
+  - Self-test instructions for ChatGPT, Gemini, Claude, Perplexity
+  - CTA: Book a call / full audit
+- No new Worker changes
+
+### Before Commit 5:
+No manual steps required. Just say "proceed with Commit 5."
