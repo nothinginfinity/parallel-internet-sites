@@ -1,45 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AFO Worker Test</title>
-<style>
-  body { font-family: -apple-system, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
-  button { background: #0070f3; color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; width: 100%; cursor: pointer; margin-top: 12px; }
-  pre { background: #1a1a1a; color: #0f0; padding: 16px; border-radius: 8px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; margin-top: 16px; min-height: 60px; }
-  h2 { margin-bottom: 4px; }
-  p { color: #666; font-size: 14px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Signup — Dev Test Form</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    body { font-family: -apple-system, sans-serif; max-width: 520px; margin: 2rem auto; padding: 1rem; color: #28251d; background: #f7f6f2; }
+    h1 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+    .subtitle { font-size: 0.85rem; color: #7a7974; margin-bottom: 1.5rem; }
+    .notice { background: #fff3cd; border: 1px solid #ffc107; border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 0.82rem; margin-bottom: 1.5rem; color: #664d03; }
+    .notice strong { display: block; margin-bottom: 0.25rem; }
+    form { display: flex; flex-direction: column; gap: 1rem; background: #fff; padding: 1.5rem; border: 1px solid #dcd9d5; border-radius: 0.75rem; }
+    label { font-size: 0.85rem; font-weight: 500; margin-bottom: 0.2rem; display: block; }
+    input, textarea, select { width: 100%; padding: 0.5rem 0.625rem; border: 1px solid #d4d1ca; border-radius: 0.375rem; font-size: 0.9rem; background: #fafaf8; }
+    input:focus, textarea:focus, select:focus { outline: 2px solid #01696f; outline-offset: 1px; }
+    textarea { min-height: 70px; resize: vertical; }
+    .section-divider { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #01696f; padding-top: 0.5rem; border-top: 1px solid #f3f0ec; }
+    button { background: #01696f; color: #fff; border: none; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+    button:hover { background: #0c4e54; }
+    button:disabled { background: #bab9b4; cursor: not-allowed; }
+    #result { margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; white-space: pre-wrap; font-size: 0.8rem; font-family: monospace; display: none; }
+    #result.ok { background: #d4dfcc; border: 1px solid #6daa45; display: block; }
+    #result.err { background: #e0ced7; border: 1px solid #a12c7b; display: block; }
+  </style>
 </head>
 <body>
-<h2>AFO Worker Test</h2>
-<p>Fires a POST to <code>/api/audit-signup</code> with founder coupon.</p>
-<button onclick="runTest()">🚀 Send Test Signup</button>
-<pre id="out">Result will appear here…</pre>
-<script>
-async function runTest() {
-  const out = document.getElementById('out');
-  out.textContent = 'Sending…';
-  try {
-    const res = await fetch('https://afo-audit-signup.jaredtechfit.workers.dev/api/audit-signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'Jared Test',
-        email: 'getfitdoc@me.com',
-        business_name: 'AFO Test Co',
-        website_url: 'agentfeedoptimization.com',
-        coupon_code: 'AFO-FOUNDER',
-        cf_turnstile_response: 'SKIP'
-      })
+  <h1>Audit Signup — Dev Test</h1>
+  <p class="subtitle">Tests <code>POST /api/audit-signup</code> directly. This form is for dev/QA use only.</p>
+
+  <div class="notice">
+    <strong>⚠ Dev form — existing Worker endpoint</strong>
+    The public snapshot form is at <a href="./snapshot-form.html">snapshot-form.html</a>.
+    This form tests the original <code>/api/audit-signup</code> intake endpoint. Do not modify that Worker.
+  </div>
+
+  <form id="testForm" novalidate>
+    <div class="section-divider">Contact</div>
+    <div><label>Name</label><input type="text" name="name" value="Dev Test" required></div>
+    <div><label>Email</label><input type="email" name="email" value="test@example.com" required></div>
+
+    <div class="section-divider">Business</div>
+    <div><label>Business name</label><input type="text" name="business_name" value="Test Business" required></div>
+    <div><label>Website URL</label><input type="url" name="website_url" value="https://example.com" required></div>
+    <div><label>Business category</label>
+      <select name="business_category">
+        <option value="">— optional —</option>
+        <option value="home_services">Home Services</option>
+        <option value="legal">Legal</option>
+        <option value="other" selected>Other</option>
+      </select>
+    </div>
+    <div><label>City / service area</label><input type="text" name="city_or_service_area" value="Test City, CA"></div>
+    <div><label>Top services</label><textarea name="top_services">service A, service B</textarea></div>
+    <div><label>Ideal customer</label><textarea name="ideal_customer">small businesses in test city</textarea></div>
+
+    <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="light"></div>
+
+    <button type="submit" id="submitBtn">Submit test audit request</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('testForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const res = document.getElementById('result');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+      res.className = '';
+
+      const data = {};
+      new FormData(e.target).forEach((v, k) => { data[k] = v; });
+
+      try {
+        const r = await fetch('/api/audit-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const json = await r.json();
+        res.textContent = JSON.stringify(json, null, 2);
+        res.className = r.ok ? 'ok' : 'err';
+      } catch (err) {
+        res.textContent = 'Fetch error: ' + err.message;
+        res.className = 'err';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit test audit request';
+      }
     });
-    const data = await res.json();
-    out.textContent = JSON.stringify(data, null, 2);
-  } catch(e) {
-    out.textContent = 'Error: ' + e.message;
-  }
-}
-</script>
+  </script>
 </body>
 </html>
