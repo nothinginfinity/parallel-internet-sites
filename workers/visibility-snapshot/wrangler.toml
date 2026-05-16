@@ -10,6 +10,13 @@ database_id = "ccbd076e-aaa7-42bb-8808-a20bd83569e2"
 [vars]
 # Secrets managed via Cloudflare dashboard:
 # TURNSTILE_SECRET
+# NOTIFY_EMAIL
+# NOTIFY_FROM
 # Rate limit windows (can override here if needed)
 SNAPSHOT_RATE_LIMIT_WINDOW_HOURS = "24"
 SNAPSHOT_MAX_PER_DOMAIN = "3"
+
+[observability]
+  [observability.logs]
+  enabled = true
+  invocation_logs = true
