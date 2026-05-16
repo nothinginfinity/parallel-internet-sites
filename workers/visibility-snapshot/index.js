@@ -4,9 +4,6 @@
  *   GET  /start                   — serves the snapshot intake form
  *   GET  /results                 — serves the results page
  *   POST /api/visibility-snapshot — runs checks, scores, generates prompts
- *
- * HTML is inlined as template literals — no bundler required.
- * DOES NOT touch /api/audit-signup or the audit_requests table.
  */
 
 const BOOKING_URL = 'https://cal.com/jared-edwards-gscxmo';
@@ -109,6 +106,31 @@ const START_HTML = `<!DOCTYPE html>
     }
     .checkbox-label { font-size: 0.875rem; line-height: 1.45; color: var(--text); cursor: pointer; }
     .checkbox-label strong { color: var(--teal); }
+    /* Booking CTA shown when audit checkbox is checked */
+    .audit-booking {
+      display: none;
+      margin-top: 0.875rem;
+      background: var(--teal);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      text-align: center;
+    }
+    .audit-booking.visible { display: block; }
+    .audit-booking p {
+      font-size: 0.85rem; color: rgba(255,255,255,0.88); margin-bottom: 0.75rem; line-height: 1.5;
+    }
+    .audit-booking a {
+      display: inline-block;
+      background: #fff;
+      color: var(--teal-dark);
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: opacity 150ms ease;
+    }
+    .audit-booking a:hover { opacity: 0.9; }
     .turnstile-wrap { display: flex; justify-content: center; margin: 0.5rem 0; }
     .submit-btn {
       width: 100%;
@@ -239,6 +261,10 @@ const START_HTML = `<!DOCTYPE html>
             <strong>I want a full AFO audit</strong> — contact me about a paid audit or install package.
           </span>
         </label>
+        <div class="audit-booking" id="auditBooking">
+          <p>Great! Skip the wait — book your free discovery call now and we'll walk you through exactly what's missing.</p>
+          <a href="https://cal.com/jared-edwards-gscxmo" target="_blank" rel="noopener noreferrer">Book My Free Discovery Call →</a>
+        </div>
       </div>
 
       <div class="card">
@@ -261,6 +287,12 @@ const START_HTML = `<!DOCTYPE html>
 
   <script>
     const SNAPSHOT_URL = '/api/visibility-snapshot';
+
+    // Show booking link when audit checkbox is checked
+    document.getElementById('requested_full_audit').addEventListener('change', function() {
+      document.getElementById('auditBooking').classList.toggle('visible', this.checked);
+    });
+
     function showError(msg) {
       const el = document.getElementById('formError');
       el.textContent = msg; el.style.display = 'block';
@@ -581,9 +613,12 @@ async function handleSnapshot(request, env) {
   const tsError = await verifyTurnstile(body['cf-turnstile-response'], env, request);
   if (tsError) return json({ error: tsError }, 403);
 
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  const rateLimitError = await checkRateLimit(env, ip, body.email, domain);
-  if (rateLimitError) return json({ error: rateLimitError }, 429);
+  // Rate limit — skip gracefully if DB not ready
+  try {
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const rateLimitError = await checkRateLimit(env, ip, body.email, domain);
+    if (rateLimitError) return json({ error: rateLimitError }, 429);
+  } catch (_) { /* DB not ready yet — skip rate limit check */ }
 
   const checks = await runChecks(website_url);
   const { score, max } = scoreChecks(checks);
@@ -604,20 +639,25 @@ async function handleSnapshot(request, env) {
     domain
   });
 
-  const customer_id = await resolveCustomer(env, body);
-  const snapshot_id = crypto.randomUUID();
-  const created_at = new Date().toISOString();
+  // Save to DB — non-fatal if tables don't exist yet
+  try {
+    const customer_id = await resolveCustomer(env, body);
+    const snapshot_id = crypto.randomUUID();
+    const created_at = new Date().toISOString();
+    await env.DB.prepare(
+      `INSERT INTO visibility_snapshots (id,customer_id,website_url,snapshot_score,snapshot_json,generated_prompts_json,self_test_status,requested_full_audit,created_at)
+       VALUES (?,?,?,?,?,?,'pending',?,?)`
+    ).bind(snapshot_id, customer_id, website_url, score,
+      JSON.stringify({ checks, total: score, max }),
+      JSON.stringify(prompts),
+      body.requested_full_audit === '1' || body.requested_full_audit === true ? 1 : 0,
+      created_at).run();
+  } catch (dbErr) {
+    // DB write failed (tables may not exist) — log and continue, still return results
+    console.error('DB write failed:', dbErr?.message || dbErr);
+  }
 
-  await env.DB.prepare(
-    `INSERT INTO visibility_snapshots (id,customer_id,website_url,snapshot_score,snapshot_json,generated_prompts_json,self_test_status,requested_full_audit,created_at)
-     VALUES (?,?,?,?,?,?,'pending',?,?)`
-  ).bind(snapshot_id, customer_id, website_url, score,
-    JSON.stringify({ checks, total: score, max }),
-    JSON.stringify(prompts),
-    body.requested_full_audit === '1' || body.requested_full_audit === true ? 1 : 0,
-    created_at).run();
-
-  return json({ ok: true, snapshot_id, score, max, grade: gradeScore(score), checks, prompts,
+  return json({ ok: true, score, max, grade: gradeScore(score), checks, prompts,
     requested_full_audit: body.requested_full_audit === '1' || body.requested_full_audit === true,
     booking_url: BOOKING_URL });
 }
