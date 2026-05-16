@@ -1,19 +1,17 @@
 /**
  * AFO Visibility Snapshot Worker
- * Route: POST /api/visibility-snapshot
- *
- * Strategy:
- * - Validate all fields
- * - Verify Turnstile
- * - Rate limit by IP + email + domain (D1)
- * - Run 10 cheap website checks (HEAD/fetch only — zero LLM API calls)
- * - Score 0–100
- * - Generate 3–5 personalised Ideal Visibility Prompts (deterministic)
- * - Store snapshot in D1 visibility_snapshots table
- * - Return score + checks + prompts to client
+ * Routes:
+ *   GET  /start                  — serves the snapshot intake form
+ *   GET  /results                — serves the results page
+ *   POST /api/visibility-snapshot — runs checks, scores, generates prompts
  *
  * DOES NOT touch /api/audit-signup or the audit_requests table.
  */
+
+import START_HTML from './start.html';
+import RESULTS_HTML from './results.html';
+
+const BOOKING_URL = 'https://cal.com/jared-edwards-gscxmo';
 
 export default {
   async fetch(request, env) {
@@ -21,14 +19,31 @@ export default {
 
     if (request.method === 'OPTIONS') return cors(new Response(null, { status: 204 }));
 
+    // ── Static page routes ──────────────────────────────────────
+    if (request.method === 'GET' && (url.pathname === '/start' || url.pathname === '/start/')) {
+      const siteKey = env.TURNSTILE_SITE_KEY || '';
+      const html = START_HTML.replace('{{TURNSTILE_SITE_KEY}}', siteKey);
+      return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+    }
+
+    if (request.method === 'GET' && (url.pathname === '/results' || url.pathname === '/results/')) {
+      // Inject booking URL + detect score=0 for error screen
+      const scoreParam = url.searchParams.get('score');
+      const isUnreachable = scoreParam === '0' || scoreParam === null && url.searchParams.has('error');
+      let html = RESULTS_HTML
+        .replace('href="#" class="cta-btn" id="ctaBtn"', `href="${BOOKING_URL}" class="cta-btn" id="ctaBtn"`);
+      return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+    }
+
+    // ── API route ───────────────────────────────────────────────
     if (request.method === 'POST' && url.pathname === '/api/visibility-snapshot') {
       return cors(await handleSnapshot(request, env));
     }
 
-    return cors(new Response(JSON.stringify({ error: 'Not found' }), {
+    return new Response(JSON.stringify({ error: 'Not found' }), {
       status: 404,
       headers: { 'Content-Type': 'application/json' }
-    }));
+    });
   }
 };
 
@@ -86,7 +101,20 @@ async function handleSnapshot(request, env) {
   // 6. Score
   const { score, max } = scoreChecks(checks);
 
-  // 7. Generate prompts
+  // 7. Site unreachable? Return early with dedicated error payload
+  const reachableCheck = checks.find(c => c.id === 'reachable');
+  if (!reachableCheck?.passed) {
+    return json({
+      ok: false,
+      error: 'unreachable',
+      score: 0,
+      max: 100,
+      message: `We couldn't reach ${domain}. Please double-check the URL and try again. If your site is live, it may have blocked our check — contact us and we can run it manually.`,
+      booking_url: BOOKING_URL
+    }, 422);
+  }
+
+  // 8. Generate prompts
   const prompts = generatePrompts({
     business_name: body.business_name,
     business_category: body.business_category || '',
@@ -96,10 +124,10 @@ async function handleSnapshot(request, env) {
     domain
   });
 
-  // 8. Resolve or create customer in D1
+  // 9. Resolve or create customer in D1
   const customer_id = await resolveCustomer(env, body);
 
-  // 9. Store snapshot
+  // 10. Store snapshot
   const snapshot_id = crypto.randomUUID();
   const created_at = new Date().toISOString();
   await env.DB.prepare(
@@ -118,7 +146,7 @@ async function handleSnapshot(request, env) {
     created_at
   ).run();
 
-  // 10. Return result
+  // 11. Return result
   return json({
     ok: true,
     snapshot_id,
@@ -127,7 +155,8 @@ async function handleSnapshot(request, env) {
     grade: gradeScore(score, max),
     checks,
     prompts,
-    requested_full_audit: body.requested_full_audit === '1' || body.requested_full_audit === true
+    requested_full_audit: body.requested_full_audit === '1' || body.requested_full_audit === true,
+    booking_url: BOOKING_URL
   });
 }
 
@@ -160,7 +189,6 @@ function normalizeUrl(raw) {
     let u = String(raw).trim();
     if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
     const parsed = new URL(u);
-    // Strip trailing slash for consistency
     return parsed.origin + (parsed.pathname === '/' ? '' : parsed.pathname);
   } catch {
     return null;
@@ -180,7 +208,6 @@ function extractDomain(url) {
 // ─────────────────────────────────────────────
 async function verifyTurnstile(token, env, request) {
   if (!token) return 'Missing Turnstile token.';
-  // Skip verification in dev if secret is not set
   if (!env.TURNSTILE_SECRET) return null;
 
   const ip = request.headers.get('CF-Connecting-IP') || '';
@@ -210,7 +237,6 @@ async function checkRateLimit(env, ip, email, domain) {
   const maxPerDomain = Number(env.SNAPSHOT_MAX_PER_DOMAIN || 3);
   const since = new Date(Date.now() - windowHours * 60 * 60 * 1000).toISOString();
 
-  // Check domain limit
   const domainCount = await env.DB.prepare(
     `SELECT COUNT(*) as cnt FROM visibility_snapshots
      WHERE website_url LIKE ? AND created_at > ?`
@@ -220,10 +246,6 @@ async function checkRateLimit(env, ip, email, domain) {
     return `A snapshot for ${domain} was already run recently. Please wait ${windowHours} hours before running another.`;
   }
 
-  // Check email limit (max 5 per window)
-  const emailDomain = email.split('@')[1] || '';
-  // Only limit by exact email, not domain (to avoid false-positives on gmail etc.)
-  // We check against customers table
   const emailCount = await env.DB.prepare(
     `SELECT COUNT(*) as cnt
      FROM visibility_snapshots vs
@@ -243,22 +265,20 @@ async function checkRateLimit(env, ip, email, domain) {
 // ─────────────────────────────────────────────
 async function runChecks(websiteUrl) {
   const checks = [
-    { id: 'reachable',         label: 'Website reachable',           points: 10 },
-    { id: 'robots_txt',        label: 'robots.txt present',          points: 5  },
-    { id: 'sitemap_xml',       label: 'sitemap.xml present',         points: 10 },
-    { id: 'llms_txt',          label: 'llms.txt present',            points: 20 },
-    { id: 'agent_context',     label: 'agent-context.json present',  points: 15 },
-    { id: 'sitemap_agent',     label: 'sitemap-agent.xml present',   points: 10 },
-    { id: 'title_meta',        label: 'Title + meta description',    points: 10 },
-    { id: 'json_ld',           label: 'JSON-LD structured data',     points: 10 },
-    { id: 'contact_path',      label: 'Contact page detectable',     points: 5  },
-    { id: 'https',             label: 'HTTPS enforced',              points: 5  },
+    { id: 'reachable',     label: 'Website reachable',          points: 10 },
+    { id: 'robots_txt',    label: 'robots.txt present',         points: 5  },
+    { id: 'sitemap_xml',   label: 'sitemap.xml present',        points: 10 },
+    { id: 'llms_txt',      label: 'llms.txt present',           points: 20 },
+    { id: 'agent_context', label: 'agent-context.json present', points: 15 },
+    { id: 'sitemap_agent', label: 'sitemap-agent.xml present',  points: 10 },
+    { id: 'title_meta',    label: 'Title + meta description',   points: 10 },
+    { id: 'json_ld',       label: 'JSON-LD structured data',    points: 10 },
+    { id: 'contact_path',  label: 'Contact page detectable',    points: 5  },
+    { id: 'https',         label: 'HTTPS enforced',             points: 5  },
   ];
 
   const origin = new URL(websiteUrl).origin;
-  const results = [];
 
-  // Run all checks concurrently with a 5s timeout each
   const settled = await Promise.allSettled([
     headCheck(`${origin}/`),
     headCheck(`${origin}/robots.txt`),
@@ -272,29 +292,18 @@ async function runChecks(websiteUrl) {
     Promise.resolve(origin.startsWith('https://')),
   ]);
 
-  for (let i = 0; i < checks.length; i++) {
-    const check = checks[i];
+  return checks.map((check, i) => {
     const result = settled[i];
     const passed = result.status === 'fulfilled' && result.value === true;
-    results.push({
-      id: check.id,
-      label: check.label,
-      passed,
-      points: check.points,
-      earned: passed ? check.points : 0
-    });
-  }
-
-  return results;
+    return { id: check.id, label: check.label, passed, points: check.points, earned: passed ? check.points : 0 };
+  });
 }
 
 async function headCheck(url) {
   try {
     const res = await fetchWithTimeout(url, { method: 'HEAD' }, 5000);
-    return res.ok || res.status === 405; // 405 = method not allowed but server exists
-  } catch {
-    return false;
-  }
+    return res.ok || res.status === 405;
+  } catch { return false; }
 }
 
 async function fetchTitleMeta(url) {
@@ -306,9 +315,7 @@ async function fetchTitleMeta(url) {
     const hasMeta  = /name=["']description["'][^>]*content=["'][^"']{10,}/i.test(html)
                   || /content=["'][^"']{10,}["'][^>]*name=["']description["']/i.test(html);
     return hasTitle && hasMeta;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 async function fetchJsonLd(url) {
@@ -317,9 +324,7 @@ async function fetchJsonLd(url) {
     if (!res.ok) return false;
     const html = await res.text();
     return /application\/ld\+json/i.test(html);
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 async function fetchContactPath(origin) {
@@ -344,19 +349,18 @@ function fetchWithTimeout(url, options, ms) {
 // Scoring
 // ─────────────────────────────────────────────
 function scoreChecks(checks) {
-  const total = checks.reduce((s, c) => s + c.points, 0);
+  const total  = checks.reduce((s, c) => s + c.points, 0);
   const earned = checks.reduce((s, c) => s + c.earned, 0);
-  // Normalise to 100
-  const score = Math.round((earned / total) * 100);
+  const score  = Math.round((earned / total) * 100);
   return { score, max: 100 };
 }
 
 function gradeScore(score) {
-  if (score >= 80) return { grade: 'A', label: 'AI-Ready', color: 'green' };
-  if (score >= 60) return { grade: 'B', label: 'Mostly Visible', color: 'yellow' };
+  if (score >= 80) return { grade: 'A', label: 'AI-Ready',          color: 'green'  };
+  if (score >= 60) return { grade: 'B', label: 'Mostly Visible',    color: 'yellow' };
   if (score >= 40) return { grade: 'C', label: 'Partially Visible', color: 'orange' };
-  if (score >= 20) return { grade: 'D', label: 'Low Visibility', color: 'red' };
-  return { grade: 'F', label: 'Not Visible to AI', color: 'red' };
+  if (score >= 20) return { grade: 'D', label: 'Low Visibility',    color: 'red'    };
+  return               { grade: 'F', label: 'Not Visible to AI',  color: 'red'    };
 }
 
 // ─────────────────────────────────────────────
@@ -365,38 +369,31 @@ function gradeScore(score) {
 // ─────────────────────────────────────────────
 function generatePrompts({ business_name, business_category, city_or_service_area,
                            top_services, ideal_customer, domain }) {
-  const biz   = business_name.trim();
-  const area  = city_or_service_area.trim();
-  const cat   = humanCategory(business_category);
-  const svcs  = firstService(top_services);
-  const cust  = ideal_customer.trim();
+  const biz  = business_name.trim();
+  const area = city_or_service_area.trim();
+  const cat  = humanCategory(business_category);
+  const svcs = firstService(top_services);
 
-  const prompts = [
+  return [
     {
       type: 'category_discovery',
       label: 'Category Discovery',
       description: 'Tests whether your business appears when someone asks for options in your category.',
-      prompt: area
-        ? `What are the best ${cat} businesses in ${area}?`
-        : `What are the best ${cat} businesses near me?`,
+      prompt: area ? `What are the best ${cat} businesses in ${area}?` : `What are the best ${cat} businesses near me?`,
       instructions: `Copy this into ChatGPT, Gemini, Claude, and Perplexity. Does ${biz} appear? Is the description accurate?`
     },
     {
       type: 'problem_solution',
       label: 'Problem / Solution',
       description: 'Tests whether LLMs recommend you when someone has the problem you solve.',
-      prompt: svcs
-        ? `I need help with ${svcs} in ${area || 'my area'}. Who do you recommend?`
-        : `I need a ${cat} service in ${area || 'my area'}. Who do you recommend?`,
+      prompt: svcs ? `I need help with ${svcs} in ${area || 'my area'}. Who do you recommend?` : `I need a ${cat} service in ${area || 'my area'}. Who do you recommend?`,
       instructions: `Does any AI mention ${biz}? If not, your business is invisible for this intent.`
     },
     {
       type: 'local_service_area',
       label: 'Local / Service Area',
       description: 'Tests local visibility for your service area.',
-      prompt: area
-        ? `Who provides ${svcs || cat + ' services'} in ${area}?`
-        : `Find a ${cat} service provider near me.`,
+      prompt: area ? `Who provides ${svcs || cat + ' services'} in ${area}?` : `Find a ${cat} service provider near me.`,
       instructions: `This is how local customers search. If ${biz} doesn't appear, local AI visibility is a gap.`
     },
     {
@@ -414,24 +411,14 @@ function generatePrompts({ business_name, business_category, city_or_service_are
       instructions: `This is your brand accuracy test. Is the description correct? Is the website (${domain}) mentioned?`
     }
   ];
-
-  return prompts;
 }
 
 function humanCategory(cat) {
   const map = {
-    home_services:        'home services',
-    legal:                'legal services',
-    healthcare:           'healthcare',
-    financial:            'financial services',
-    real_estate:          'real estate',
-    restaurant_food:      'restaurant',
-    retail:               'retail',
-    professional_services:'professional services',
-    tech_saas:            'technology',
-    agency_marketing:     'marketing agency',
-    nonprofit:            'nonprofit',
-    other:                'local business'
+    home_services: 'home services', legal: 'legal services', healthcare: 'healthcare',
+    financial: 'financial services', real_estate: 'real estate', restaurant_food: 'restaurant',
+    retail: 'retail', professional_services: 'professional services', tech_saas: 'technology',
+    agency_marketing: 'marketing agency', nonprofit: 'nonprofit', other: 'local business'
   };
   return map[cat] || 'local business';
 }
@@ -456,12 +443,6 @@ async function resolveCustomer(env, body) {
   await env.DB.prepare(
     `INSERT INTO customers (id, name, email, website_url, created_at)
      VALUES (?, ?, ?, ?, ?)`
-  ).bind(
-    id,
-    body.name.trim(),
-    email,
-    normalizeUrl(body.website_url),
-    new Date().toISOString()
-  ).run();
+  ).bind(id, body.name.trim(), email, normalizeUrl(body.website_url), new Date().toISOString()).run();
   return id;
 }

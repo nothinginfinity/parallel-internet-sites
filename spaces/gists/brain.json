@@ -1,19 +1,108 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-15T22:58:00.000Z",
+  "generated_at": "2026-05-16T01:32:00.000Z",
   "database_id": "35bd927c-9792-81b9-816a-e357c9339d2f",
-  "note_count": 8,
+  "note_count": 11,
   "has_more": false,
-  "fortune_decode": "Agent second brain. 8 sessions distilled. Latest: 2026-05-15. Projects: repo-copilot, parallel-internet-sites. Top concepts: AFO-first strategy, visibility-snapshot, prompt-generator, results-page, /results route, score-ring SVG, check rows, platform badges, copy-to-clipboard.",
+  "fortune_decode": "Agent second brain. 11 sessions distilled. Latest: 2026-05-15 evening. Projects: repo-copilot, parallel-internet-sites. Top concepts: Commit 11 shipped — /start route live, Cal.com wired, score=0 error screen, booking URL confirmed. Remaining blockers: migration-v2.sql apply, QA checklist, TrueBuild demo label, AFO self-test, Jared sign-off.",
   "notes": [
+    {
+      "title": "Commit 11 shipped — /start route, Cal.com CTA, score=0 error screen",
+      "date": "2026-05-15",
+      "source": "Alice",
+      "project": "parallel-internet-sites",
+      "new_concepts": [
+        "GET /start route live",
+        "start.html created with all 8 required fields + Turnstile + optional full-audit checkbox",
+        "TURNSTILE_SITE_KEY injected at serve time from env secret",
+        "GET /results route live",
+        "Cal.com booking URL: https://cal.com/jared-edwards-gscxmo",
+        "CTA button hardwired to Cal.com URL",
+        "score=0 / unreachable site shows dedicated error screen with Try Again + Book Manual Check",
+        "sessionStorage fallback to query param if storage blocked",
+        "index.js imports start.html + results.html as static assets"
+      ],
+      "decisions": "Cal.com chosen over Calendly — free plan, unlimited event types, developer-brand aligned. Booking URL = https://cal.com/jared-edwards-gscxmo. Unreachable error screen shows 🔌 icon + message + two CTAs (try again / book manual check). index.js now handles GET /start, GET /results, POST /api/visibility-snapshot. POST /api/audit-signup untouched.",
+      "open_questions": "Remaining blockers before go-live: (1) apply migration-v2.sql to prod D1, (2) run qa-checklist.md, (3) mark TrueBuild as demo on homepage, (4) run AFO self-test through snapshot, (5) Jared signs launch-readiness.md.",
+      "cid": "alice/2026-05-15-evening/jared"
+    },
+    {
+      "title": "AFO site architecture confirmed — Worker not Pages, /start not yet live",
+      "date": "2026-05-15",
+      "source": "Alice",
+      "project": "parallel-internet-sites",
+      "new_concepts": [
+        "afo-site Worker serves agentfeedoptimization.com directly",
+        "no separate Pages project",
+        "no separate site repo",
+        "start.html exists as template but /start route not wired",
+        "146 unique visitors with broken CTA",
+        "TrueBuild still shown as real case study on homepage"
+      ],
+      "decisions": "Worker name: afo-site. Custom domain: agentfeedoptimization.com. Source repo: parallel-internet-sites. /start must be wired as a route in the Worker handler. Turnstile key injected at serve time. CTA URL = agentfeedoptimization.com/start?source=snapshot-results.",
+      "open_questions": null,
+      "cid": "alice/2026-05-15-evening/jared"
+    },
+    {
+      "title": "Brainstorm Q&A resolved — all 5 AFO snapshot open questions answered",
+      "date": "2026-05-15",
+      "source": "Alice",
+      "project": "parallel-internet-sites",
+      "new_concepts": [
+        "CTA URL: /start?source=snapshot-results",
+        "unreachable-site error screen",
+        "confirmation email post-launch",
+        "/start as form host",
+        "AFO self-test gate before launch"
+      ],
+      "decisions": "CTA URL = agentfeedoptimization.com/start?source=snapshot-results. Confirmation email deferred post-launch. Form on /start (no separate page). Score=0 gets dedicated error screen. AFO self-test required before public launch.",
+      "open_questions": null,
+      "cid": "alice/2026-05-15/jared"
+    },
+    {
+      "title": "BLT-020 filed — AFO Visibility Snapshot 10-commit build complete",
+      "date": "2026-05-15",
+      "source": "Alice",
+      "project": "parallel-internet-sites",
+      "new_concepts": [
+        "AFO Visibility Snapshot",
+        "free-vs-paid boundary",
+        "ideal visibility prompts",
+        "D1-backed rate limiting",
+        "snapshot endpoint",
+        "cheap website checks",
+        "results page score ring",
+        "product boundary doc",
+        "launch readiness gate"
+      ],
+      "decisions": "10 commits shipped. POST /api/audit-signup untouched. BLT-020 filed for Brainstorm review.",
+      "open_questions": null,
+      "cid": "alice/2026-05-15/jared"
+    },
+    {
+      "title": "AFO funnel strategy correction — free tier is Visibility Snapshot not full audit",
+      "date": "2026-05-15",
+      "source": "Alice",
+      "project": "parallel-internet-sites",
+      "new_concepts": [
+        "AFO as Customer #1",
+        "TrueBuild as demo-only",
+        "Visibility Snapshot vs full audit",
+        "no LLM calls in free flow",
+        "manual audit gate"
+      ],
+      "decisions": "Free CTA = AFO Visibility Snapshot. Full audit = manual/paid/call-gated. TrueBuild = demo only.",
+      "open_questions": null,
+      "cid": "alice/2026-05-15/jared"
+    },
     {
       "title": "archive_block op added to notion-ops",
       "date": "2026-05-09",
       "source": "Perplexity",
       "project": "repo-copilot",
       "new_concepts": ["archive_block", "notion-ops-soft-delete", "unarchive-support"],
-      "decisions": "Added archive_block op — PATCH /blocks/{id} with archived:true; unarchive boolean supported",
-      "open_questions": "Should we also add a dedicated archive_database alias op for clarity?",
+      "decisions": "Added archive_block op — PATCH /blocks/{id} with archived:true",
+      "open_questions": "Should we add archive_database alias op?",
       "cid": "bob/c2/jared"
     },
     {
@@ -22,8 +111,8 @@
       "source": "Perplexity",
       "project": "repo-copilot",
       "new_concepts": ["cleanup-audit", "notion-ops-result-write-verified"],
-      "decisions": "Items 1 and 3 already clean; Item 2 (archive old DB) needs Jared action in Notion",
-      "open_questions": "Should we add archive_database op to notion-ops to avoid future manual Notion steps?",
+      "decisions": "Items 1 and 3 clean; Item 2 needs Jared action in Notion",
+      "open_questions": "Should we add archive_database op?",
       "cid": "bob/c2/jared"
     },
     {
@@ -31,9 +120,9 @@
       "date": "2026-05-09",
       "source": "Perplexity",
       "project": "repo-copilot",
-      "new_concepts": ["multi-user provisioning", "bootstrap URL pattern", "gist template with placeholders", "provision GitHub Action", "Notion Roadmap DB", "phase-ordered build roadmap"],
-      "decisions": "Space instructions = one bootstrap URL. Build order finalized. Notion Roadmap DB is next build step.",
-      "open_questions": "Provision Action design: GitHub App vs PAT for multi-user repo forking?",
+      "new_concepts": ["multi-user provisioning", "bootstrap URL pattern", "gist template with placeholders", "provision GitHub Action", "Notion Roadmap DB"],
+      "decisions": "Space instructions = one bootstrap URL. Build order finalized.",
+      "open_questions": "GitHub App vs PAT for multi-user repo forking?",
       "cid": "alice/c2/jared"
     },
     {
@@ -41,19 +130,19 @@
       "date": "2026-05-09",
       "source": "Perplexity",
       "project": "repo-copilot",
-      "new_concepts": ["turn as unit of memory", "turn-level brain push", "3-slot tool call budget", "minimum viable turn note", "slot-3 brain push reservation"],
-      "decisions": "Every Alice turn ends with push including brain.json. Minimum viable note = title+date+source+cid.",
-      "open_questions": "Bob and Charlie Space instructions need same turn-level mandate.",
+      "new_concepts": ["turn as unit of memory", "turn-level brain push", "3-slot tool call budget"],
+      "decisions": "Every Alice turn ends with brain push as slot 3.",
+      "open_questions": "Bob and Charlie Space instructions need same mandate.",
       "cid": "alice/c2/jared"
     },
     {
-      "title": "adapter_ref + G-008 ALERT + Charlie slot + notion-ops SKILL Stone",
+      "title": "adapter_ref + G-008 ALERT + Charlie slot + notion-ops SKILL Stone + brain.json read primitive",
       "date": "2026-05-09",
       "source": "Perplexity",
       "project": "repo-copilot",
-      "new_concepts": ["adapter_ref", "SKILL Stone self-invocation", "G-008 ALERT type", "Charlie agent slot", "export_brain op"],
-      "decisions": "adapter_ref field added to QA.Stone. G-008 ALERT type formalized. Charlie agent slot seeded. brain.json read primitive implemented.",
-      "open_questions": "Three-Agents Demo build not yet started.",
+      "new_concepts": ["adapter_ref", "G-008 ALERT type", "Charlie agent slot", "export_brain op"],
+      "decisions": "adapter_ref added. G-008 formalized. Charlie slot seeded. brain.json read primitive implemented.",
+      "open_questions": "notion-ops SKILL Stone gist_id is null.",
       "cid": "alice/c2/jared"
     },
     {
@@ -61,30 +150,10 @@
       "date": "2026-05-09",
       "source": "Perplexity",
       "project": "repo-copilot",
-      "new_concepts": ["normalizeSrc", "execFileSync", "zip bomb guard", "create_database op", "append_row op", "append_note op", "agent second brain pattern"],
-      "decisions": "Hardened gitzip-push. Added create_database, append_row, append_note to notion-ops. append_note is canonical session-end write primitive.",
-      "open_questions": "When to build brain.json read primitive?",
+      "new_concepts": ["normalizeSrc", "zip bomb guard", "create_database op", "append_note op", "G-010 BRAIN gist type"],
+      "decisions": "Hardened gitzip-push. append_note is canonical session-end write primitive.",
+      "open_questions": null,
       "cid": "bob/c1/jared"
-    },
-    {
-      "title": "Commit 5 — prompt-generator.js shipped",
-      "date": "2026-05-15",
-      "source": "Alice",
-      "project": "parallel-internet-sites",
-      "new_concepts": ["deterministic-prompt-generation", "ideal-visibility-prompts", "no-LLM-free-flow", "prompt-template-pattern", "sanitize-then-build"],
-      "decisions": "prompt-generator.js + test file pushed. 5 prompt types. Pure ESM, no external deps.",
-      "open_questions": "Does Commit 6 update an existing results page or create a new one? Answer: create fresh.",
-      "cid": "alice/parallel-internet-sites/jared"
-    },
-    {
-      "title": "Commit 6 — /results route + results-page.js shipped",
-      "date": "2026-05-15",
-      "source": "Alice",
-      "project": "parallel-internet-sites",
-      "new_concepts": ["results-page-renderer", "score-ring-svg", "check-rows", "platform-badges", "copy-to-clipboard", "query-param-driven-results", "graceful-prompt-fallback"],
-      "decisions": "results-page.js added as pure HTML renderer module. GET /results wired in index.js — reads score/checks/business fields from query params, generates prompts via generatePrompts(), renders full results page. /api/audit-signup untouched. Commits 1-6 done. Next: Commit 7 — rate limiting / abuse controls.",
-      "open_questions": "Commit 7 KV bindings — does the Worker's wrangler.toml already have a KV namespace, or does one need to be created?",
-      "cid": "alice/parallel-internet-sites/jared"
     }
   ]
 }
