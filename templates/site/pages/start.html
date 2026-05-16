@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Start Your Free AFO Audit — {{BUSINESS_NAME}}</title>
-  <meta name="description" content="Request your free Agent Feed Optimization audit. We'll analyze how LLMs perceive your brand and show you exactly what to fix.">
+  <title>Free AFO Visibility Snapshot — {{BUSINESS_NAME}}</title>
+  <meta name="description" content="Find out if your business appears when AI systems answer your customers' questions. Get your free AFO Visibility Snapshot in minutes.">
   <meta name="robots" content="noindex">
   <link rel="canonical" href="{{CANONICAL_DOMAIN}}/start">
   {{HEAD_INCLUDES}}
@@ -16,10 +16,10 @@
   <main id="main-content">
     <section class="start-hero">
       <div class="container">
-        <div class="start-badge">Founder Access</div>
-        <h1>Start Your Free AFO Audit</h1>
-        <p class="start-lead">Tell us about your business. We'll audit how AI systems currently perceive your brand — and map the gap between what they say and what's true.</p>
-        <p class="start-sub">No credit card. No payment system. Just a real audit, on us, while we build this together.</p>
+        <div class="start-badge">Free · No Credit Card</div>
+        <h1>Get Your Free AFO Visibility Snapshot</h1>
+        <p class="start-lead">Does your business appear when AI systems answer the questions your ideal customers are asking? Find out in minutes — and get the exact prompts to test it yourself in ChatGPT, Gemini, Claude, and Perplexity.</p>
+        <p class="start-sub">Instant results. No sales call required. A real audit is available if you want one.</p>
       </div>
     </section>
 
@@ -27,56 +27,117 @@
       <div class="container container--narrow">
 
         <div id="form-wrapper">
-          <form id="audit-signup-form" novalidate>
+          <form id="snapshot-form" novalidate>
 
             <!-- Hidden fields -->
             <input type="hidden" name="source" value="afo_site">
-            <input type="hidden" name="launch_phase" value="dogfood_v1">
-            <input type="hidden" name="requested_plan" value="founder_free">
+            <input type="hidden" name="launch_phase" value="snapshot_v1">
+            <input type="hidden" name="requested_plan" value="free_snapshot">
 
-            <div class="form-group">
-              <label for="name">Your name <span aria-hidden="true">*</span></label>
-              <input type="text" id="name" name="name" required autocomplete="name" placeholder="Jane Smith">
-              <span class="field-error" id="name-error" role="alert"></span>
-            </div>
+            <!-- ── Section 1: About You ── -->
+            <fieldset class="form-section">
+              <legend class="form-section-legend">About you</legend>
 
-            <div class="form-group">
-              <label for="email">Email address <span aria-hidden="true">*</span></label>
-              <input type="email" id="email" name="email" required autocomplete="email" placeholder="jane@yourcompany.com">
-              <span class="field-error" id="email-error" role="alert"></span>
-            </div>
+              <div class="form-group">
+                <label for="name">Your name <span aria-hidden="true">*</span></label>
+                <input type="text" id="name" name="name" required autocomplete="name" placeholder="Jane Smith">
+                <span class="field-error" id="name-error" role="alert"></span>
+              </div>
 
-            <div class="form-group">
-              <label for="business_name">Business name <span aria-hidden="true">*</span></label>
-              <input type="text" id="business_name" name="business_name" required autocomplete="organization" placeholder="Acme Corp">
-              <span class="field-error" id="business_name-error" role="alert"></span>
-            </div>
+              <div class="form-group">
+                <label for="email">Email address <span aria-hidden="true">*</span></label>
+                <input type="email" id="email" name="email" required autocomplete="email" placeholder="jane@yourcompany.com">
+                <span class="field-error" id="email-error" role="alert"></span>
+              </div>
 
-            <div class="form-group">
-              <label for="website_url">Website URL <span aria-hidden="true">*</span></label>
-              <input type="url" id="website_url" name="website_url" required autocomplete="url" placeholder="https://yourcompany.com">
-              <span class="field-error" id="website_url-error" role="alert"></span>
-            </div>
+            </fieldset>
 
-            <div class="form-group">
-              <label for="role">Your role <span class="optional">(optional)</span></label>
-              <input type="text" id="role" name="role" autocomplete="organization-title" placeholder="Founder, Marketing Director, etc.">
-            </div>
+            <!-- ── Section 2: Your Business ── -->
+            <fieldset class="form-section">
+              <legend class="form-section-legend">Your business</legend>
 
-            <div class="form-group">
-              <label for="coupon_code">Founder coupon code <span class="optional">(optional)</span></label>
-              <input type="text" id="coupon_code" name="coupon_code" placeholder="AFO-FOUNDER" autocomplete="off" style="text-transform:uppercase">
-              <span class="field-hint">Have an early-access code? Enter it here for founder-tier free access.</span>
-              <span class="field-error" id="coupon_code-error" role="alert"></span>
-            </div>
+              <div class="form-group">
+                <label for="business_name">Business name <span aria-hidden="true">*</span></label>
+                <input type="text" id="business_name" name="business_name" required autocomplete="organization" placeholder="Acme Corp">
+                <span class="field-error" id="business_name-error" role="alert"></span>
+              </div>
 
-            <div class="form-group form-group--consent">
-              <label class="checkbox-label">
-                <input type="checkbox" id="consent" name="consent" required>
-                <span>I agree to be contacted about my audit results. No spam — ever.</span>
-              </label>
-              <span class="field-error" id="consent-error" role="alert"></span>
-            </div>
+              <div class="form-group">
+                <label for="website_url">Website URL <span aria-hidden="true">*</span></label>
+                <input type="url" id="website_url" name="website_url" required autocomplete="url" placeholder="https://yourcompany.com">
+                <span class="field-error" id="website_url-error" role="alert"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="business_category">Business category <span aria-hidden="true">*</span></label>
+                <select id="business_category" name="business_category" required>
+                  <option value="" disabled selected>Select a category…</option>
+                  <option value="home_services">Home Services (plumbing, HVAC, electrical, etc.)</option>
+                  <option value="legal">Legal Services</option>
+                  <option value="medical_dental">Medical / Dental</option>
+                  <option value="financial">Financial Services / Accounting</option>
+                  <option value="real_estate">Real Estate</option>
+                  <option value="restaurant_food">Restaurant / Food & Beverage</option>
+                  <option value="retail">Retail / eCommerce</option>
+                  <option value="fitness_wellness">Fitness / Wellness / Beauty</option>
+                  <option value="education">Education / Tutoring / Coaching</option>
+                  <option value="marketing_agency">Marketing / Agency / Consulting</option>
+                  <option value="tech_saas">Technology / SaaS</option>
+                  <option value="nonprofit">Nonprofit / Community Org</option>
+                  <option value="other">Other</option>
+                </select>
+                <span class="field-error" id="business_category-error" role="alert"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="city_or_service_area">City or service area <span aria-hidden="true">*</span></label>
+                <input type="text" id="city_or_service_area" name="city_or_service_area" required placeholder="e.g. San Diego, CA or Southern California">
+                <span class="field-hint">Where do your customers find you? City, region, or "nationwide."</span>
+                <span class="field-error" id="city_or_service_area-error" role="alert"></span>
+              </div>
+
+            </fieldset>
+
+            <!-- ── Section 3: What You Do ── -->
+            <fieldset class="form-section">
+              <legend class="form-section-legend">What you do</legend>
+
+              <div class="form-group">
+                <label for="top_services">Top 2–3 services or products <span aria-hidden="true">*</span></label>
+                <input type="text" id="top_services" name="top_services" required placeholder="e.g. roof replacement, gutter cleaning, storm damage repair">
+                <span class="field-hint">Separate with commas. Be specific — this shapes your visibility prompts.</span>
+                <span class="field-error" id="top_services-error" role="alert"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="ideal_customer">Who is your ideal customer? <span aria-hidden="true">*</span></label>
+                <input type="text" id="ideal_customer" name="ideal_customer" required placeholder="e.g. homeowners in San Diego dealing with roof leaks after a storm">
+                <span class="field-hint">Describe the person most likely to search for what you do.</span>
+                <span class="field-error" id="ideal_customer-error" role="alert"></span>
+              </div>
+
+            </fieldset>
+
+            <!-- ── Section 4: Options ── -->
+            <fieldset class="form-section">
+              <legend class="form-section-legend">Options</legend>
+
+              <div class="form-group form-group--consent">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="requested_full_audit" name="requested_full_audit" value="true">
+                  <span>I'm also interested in a full AFO audit or install — please reach out.</span>
+                </label>
+              </div>
+
+              <div class="form-group form-group--consent">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="consent" name="consent" required>
+                  <span>I agree to be contacted about my snapshot results. No spam — ever. <span aria-hidden="true">*</span></span>
+                </label>
+                <span class="field-error" id="consent-error" role="alert"></span>
+              </div>
+
+            </fieldset>
 
             <!-- Cloudflare Turnstile -->
             <div class="cf-turnstile" data-sitekey="{{TURNSTILE_SITE_KEY}}" data-theme="auto"></div>
@@ -84,7 +145,7 @@
             <div id="form-submit-error" class="form-error-banner" role="alert" hidden></div>
 
             <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
-              Request My Free Audit
+              Run My Free Visibility Snapshot
             </button>
 
             <p class="form-footnote">By submitting, you confirm this is accurate information about your business. We'll never share it.</p>
@@ -94,9 +155,9 @@
 
         <div id="form-success" hidden>
           <div class="success-icon" aria-hidden="true">✓</div>
-          <h2>You're on the list.</h2>
-          <p>We received your audit request for <strong id="success-business"></strong>. Check your inbox — a confirmation is on its way.</p>
-          <p class="success-sub">We review every request personally. Expect to hear from us within a few business days.</p>
+          <h2>Your snapshot is running.</h2>
+          <p>We're checking <strong id="success-website"></strong> and generating your Ideal Visibility Prompts now. Check your inbox — results will be there shortly.</p>
+          <p class="success-sub">Use the prompts we send you to test your visibility in ChatGPT, Gemini, Claude, and Perplexity right now.</p>
           <a href="/" class="btn btn-secondary">Back to home</a>
         </div>
 
@@ -108,15 +169,19 @@
 
   <script>
   (function() {
-    const form = document.getElementById('audit-signup-form');
+    const form = document.getElementById('snapshot-form');
     const submitBtn = document.getElementById('submit-btn');
     const formWrapper = document.getElementById('form-wrapper');
     const successDiv = document.getElementById('form-success');
     const submitError = document.getElementById('form-submit-error');
 
-    const ENDPOINT = '{{AUDIT_SIGNUP_ENDPOINT}}';
-    // fallback for local dev
-    const endpoint = ENDPOINT.startsWith('{{') ? '/api/audit-signup' : ENDPOINT;
+    const ENDPOINT = '{{VISIBILITY_SNAPSHOT_ENDPOINT}}';
+    const endpoint = ENDPOINT.startsWith('{{') ? '/api/visibility-snapshot' : ENDPOINT;
+
+    const REQUIRED_FIELDS = [
+      'name', 'email', 'business_name', 'website_url',
+      'business_category', 'city_or_service_area', 'top_services', 'ideal_customer'
+    ];
 
     function setFieldError(fieldId, message) {
       const el = document.getElementById(fieldId + '-error');
@@ -126,20 +191,38 @@
     }
 
     function clearErrors() {
-      ['name', 'email', 'business_name', 'website_url', 'coupon_code', 'consent'].forEach(f => setFieldError(f, ''));
+      REQUIRED_FIELDS.forEach(f => setFieldError(f, ''));
+      setFieldError('consent', '');
       submitError.hidden = true;
     }
 
     function validateForm(data) {
       let valid = true;
+
       if (!data.name) { setFieldError('name', 'Name is required.'); valid = false; }
+
       if (!data.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) {
         setFieldError('email', 'A valid email address is required.'); valid = false;
       }
+
       if (!data.business_name) { setFieldError('business_name', 'Business name is required.'); valid = false; }
-      if (!data.website_url) { setFieldError('website_url', 'Website URL is required.'); valid = false; }
+
+      if (!data.website_url) {
+        setFieldError('website_url', 'Website URL is required.'); valid = false;
+      } else {
+        try { new URL(data.website_url); } catch {
+          setFieldError('website_url', 'Please enter a valid URL (e.g. https://yoursite.com).'); valid = false;
+        }
+      }
+
+      if (!data.business_category) { setFieldError('business_category', 'Please select a business category.'); valid = false; }
+      if (!data.city_or_service_area) { setFieldError('city_or_service_area', 'City or service area is required.'); valid = false; }
+      if (!data.top_services) { setFieldError('top_services', 'Please list your top services.'); valid = false; }
+      if (!data.ideal_customer) { setFieldError('ideal_customer', 'Please describe your ideal customer.'); valid = false; }
+
       const consentEl = document.getElementById('consent');
       if (!consentEl.checked) { setFieldError('consent', 'You must agree to continue.'); valid = false; }
+
       return valid;
     }
 
@@ -149,13 +232,17 @@
 
       const fd = new FormData(form);
       const tsResponse = document.querySelector('[name=cf-turnstile-response]');
+
       const data = {
         name: fd.get('name')?.trim(),
         email: fd.get('email')?.trim().toLowerCase(),
         business_name: fd.get('business_name')?.trim(),
         website_url: fd.get('website_url')?.trim(),
-        role: fd.get('role')?.trim() || undefined,
-        coupon_code: fd.get('coupon_code')?.trim().toUpperCase() || undefined,
+        business_category: fd.get('business_category'),
+        city_or_service_area: fd.get('city_or_service_area')?.trim(),
+        top_services: fd.get('top_services')?.trim(),
+        ideal_customer: fd.get('ideal_customer')?.trim(),
+        requested_full_audit: fd.get('requested_full_audit') === 'true',
         source: fd.get('source'),
         launch_phase: fd.get('launch_phase'),
         requested_plan: fd.get('requested_plan'),
@@ -165,7 +252,7 @@
       if (!validateForm(data)) return;
 
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Sending…';
+      submitBtn.textContent = 'Running snapshot…';
 
       try {
         const res = await fetch(endpoint, {
@@ -176,21 +263,22 @@
         const result = await res.json();
 
         if (result.ok) {
-          document.getElementById('success-business').textContent = data.business_name;
+          document.getElementById('success-website').textContent = data.website_url;
           formWrapper.hidden = true;
           successDiv.hidden = false;
           successDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
-          submitError.textContent = result.error || 'Something went wrong. Please try again.';
+          const msg = result.error || 'Something went wrong. Please try again.';
+          submitError.textContent = msg;
           submitError.hidden = false;
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Request My Free Audit';
+          submitBtn.textContent = 'Run My Free Visibility Snapshot';
         }
       } catch {
         submitError.textContent = 'Network error. Please check your connection and try again.';
         submitError.hidden = false;
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Request My Free Audit';
+        submitBtn.textContent = 'Run My Free Visibility Snapshot';
       }
     });
   })();
