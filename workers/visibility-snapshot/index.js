@@ -2,8 +2,17 @@
  * AFO Visibility Snapshot Worker
  * Routes:
  *   GET  /start                   — serves the snapshot intake form
- *   GET  /results                 — serves the results page
+ *   GET  /results                 — serves the results page (reads ?d= param)
  *   POST /api/visibility-snapshot — runs checks, scores, generates prompts
+ *
+ * Env vars:
+ *   TURNSTILE_SITE_KEY   — public Turnstile site key (injected into form HTML)
+ *   TURNSTILE_SECRET     — Turnstile secret for server-side verify
+ *   DB                   — D1 database binding
+ *   NOTIFY_EMAIL         — email address to receive lead notifications (e.g. jared@agentfeedoptimization.com)
+ *   NOTIFY_FROM          — sender address for MailChannels (e.g. noreply@agentfeedoptimization.com)
+ *   SNAPSHOT_RATE_LIMIT_WINDOW_HOURS — default 24
+ *   SNAPSHOT_MAX_PER_DOMAIN          — default 3
  */
 
 const BOOKING_URL = 'https://cal.com/jared-edwards-gscxmo';
@@ -106,7 +115,6 @@ const START_HTML = `<!DOCTYPE html>
     }
     .checkbox-label { font-size: 0.875rem; line-height: 1.45; color: var(--text); cursor: pointer; }
     .checkbox-label strong { color: var(--teal); }
-    /* Booking CTA shown when audit checkbox is checked */
     .audit-booking {
       display: none;
       margin-top: 0.875rem;
@@ -288,7 +296,6 @@ const START_HTML = `<!DOCTYPE html>
   <script>
     const SNAPSHOT_URL = '/api/visibility-snapshot';
 
-    // Show booking link when audit checkbox is checked
     document.getElementById('requested_full_audit').addEventListener('change', function() {
       document.getElementById('auditBooking').classList.toggle('visible', this.checked);
     });
@@ -302,6 +309,7 @@ const START_HTML = `<!DOCTYPE html>
       const el = document.getElementById('formError');
       el.textContent = ''; el.style.display = 'none';
     }
+
     document.getElementById('snapshotForm').addEventListener('submit', async (e) => {
       e.preventDefault(); clearError();
       const btn = document.getElementById('submitBtn');
@@ -328,14 +336,11 @@ const START_HTML = `<!DOCTYPE html>
           overlay.classList.remove('active'); btn.disabled = false;
           showError(data.error || 'Something went wrong. Please try again.'); return;
         }
+        // Attach meta for results page rendering
         data._meta = { business_name: body.business_name, city_or_service_area: body.city_or_service_area, top_services: body.top_services };
-        try {
-          sessionStorage.setItem('afo_snapshot_result', JSON.stringify(data));
-        } catch (_) {
-          const params = new URLSearchParams({ score: data.score, grade: data.grade?.grade || 'F', sid: data.snapshot_id || '' });
-          window.location.href = '/results?' + params.toString(); return;
-        }
-        window.location.href = '/results';
+        // Pass full result as base64url-encoded JSON in query param — no sessionStorage needed
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data)))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=/g,'');
+        window.location.href = '/results?d=' + encoded;
       } catch (err) {
         overlay.classList.remove('active'); btn.disabled = false;
         showError('Network error. Please check your connection and try again.');
@@ -450,7 +455,7 @@ const RESULTS_HTML = `<!DOCTYPE html>
         <a href="https://cal.com/jared-edwards-gscxmo" target="_blank" rel="noopener noreferrer" class="btn-secondary">Book a Manual Check →</a>
       </div>
     </div>
-    <div class="error-state" id="errorState"><h2>Something went wrong</h2><p id="errorMsg">Unable to load your snapshot results.</p></div>
+    <div class="error-state" id="errorState"><h2>Something went wrong</h2><p id="errorMsg">Unable to load your snapshot results.</p><br><a href="/start" class="btn-primary" style="margin-top:1rem">← Back to form</a></div>
     <div id="results">
       <div class="header">
         <div class="eyebrow">Agent Feed Optimization</div>
@@ -514,7 +519,7 @@ const RESULTS_HTML = `<!DOCTYPE html>
       setTimeout(()=>{animateNumber(document.getElementById('scoreNumber'),score,1000);document.getElementById('scoreBar').style.width=score+'%';},300);
     }
     function renderChecks(checks){
-      document.getElementById('checksList').innerHTML=checks.map(c=>'<div class="check-row '+(c.passed?'pass':'fail')+'"><span class="check-icon">'+(c.passed?'✓':'×')+'</span><span class="check-label">'+c.label+'</span><span class="check-points'+(c.passed?' earned':'')+'">'+(c.passed?'+'+c.points:'0')+' pts</span></div>').join('');
+      document.getElementById('checksList').innerHTML=checks.map(c=>'<div class="check-row '+(c.passed?'pass':'fail')+'"><span class="check-icon">'+(c.passed?'✓':'×')+'</span><span class="check-label">'+c.label+'</span><span class="check-points'+(c.passed?' earned':'')+'">+'+(c.passed?c.points:'0')+' pts</span></div>').join('');
     }
     function renderPrompts(prompts){
       const list=document.getElementById('promptList');
@@ -536,7 +541,7 @@ const RESULTS_HTML = `<!DOCTYPE html>
     }
     function renderCta(data){
       if(data.requested_full_audit){
-        document.getElementById('ctaHeading').textContent='✓ Full audit requested — we\'ll be in touch';
+        document.getElementById('ctaHeading').textContent='✓ Full audit requested — we\\'ll be in touch';
         document.getElementById('ctaBody').textContent='A member of our team will reach out within 1 business day to schedule your full AFO audit.';
         document.getElementById('ctaBtn').style.display='none';
       }
@@ -544,16 +549,24 @@ const RESULTS_HTML = `<!DOCTYPE html>
     function showError(msg){document.getElementById('loadingState').style.display='none';document.getElementById('errorState').style.display='block';document.getElementById('errorMsg').textContent=msg;}
     function showUnreachable(msg){document.getElementById('loadingState').style.display='none';document.getElementById('unreachableState').style.display='block';if(msg)document.getElementById('unreachableMsg').textContent=msg;}
     function showResults(data){document.getElementById('loadingState').style.display='none';document.getElementById('results').style.display='block';renderScore(data.score,data.grade);renderChecks(data.checks);renderPrompts(data.prompts);renderIdealResponse(data);renderCta(data);}
+
     window.addEventListener('DOMContentLoaded',()=>{
-      try{
-        const raw=sessionStorage.getItem('afo_snapshot_result');
-        if(raw){
-          const data=JSON.parse(raw);
-          sessionStorage.removeItem('afo_snapshot_result');
-          if(data.error==='unreachable'){showUnreachable(data.message);return;}
-          showResults(data);
-        } else { showError('No snapshot data found. Please return to the form and submit again.'); }
-      } catch(e){ showError('Could not load snapshot results. Please try again.'); }
+      try {
+        // Read result from ?d= query param (base64url-encoded JSON)
+        const params = new URLSearchParams(window.location.search);
+        const d = params.get('d');
+        if (!d) { showError('No snapshot data found. Please return to the form and submit again.'); return; }
+        // Decode base64url → base64 → JSON
+        const b64 = d.replace(/-/g,'+').replace(/_/g,'/');
+        const json = decodeURIComponent(escape(atob(b64)));
+        const data = JSON.parse(json);
+        if (data.error === 'unreachable') { showUnreachable(data.message); return; }
+        showResults(data);
+        // Clean URL so refresh doesn't re-render with stale data
+        window.history.replaceState(null, '', '/results');
+      } catch(e) {
+        showError('Could not load snapshot results. Please try again.');
+      }
     });
   <\/script>
 </body>
@@ -618,7 +631,7 @@ async function handleSnapshot(request, env) {
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     const rateLimitError = await checkRateLimit(env, ip, body.email, domain);
     if (rateLimitError) return json({ error: rateLimitError }, 429);
-  } catch (_) { /* DB not ready yet — skip rate limit check */ }
+  } catch (_) { /* DB not ready yet — skip */ }
 
   const checks = await runChecks(website_url);
   const { score, max } = scoreChecks(checks);
@@ -639,10 +652,12 @@ async function handleSnapshot(request, env) {
     domain
   });
 
-  // Save to DB — non-fatal if tables don't exist yet
+  const requested_full_audit = body.requested_full_audit === '1' || body.requested_full_audit === true;
+
+  // Save to DB — non-fatal
+  let snapshot_id = crypto.randomUUID();
   try {
     const customer_id = await resolveCustomer(env, body);
-    const snapshot_id = crypto.randomUUID();
     const created_at = new Date().toISOString();
     await env.DB.prepare(
       `INSERT INTO visibility_snapshots (id,customer_id,website_url,snapshot_score,snapshot_json,generated_prompts_json,self_test_status,requested_full_audit,created_at)
@@ -650,16 +665,110 @@ async function handleSnapshot(request, env) {
     ).bind(snapshot_id, customer_id, website_url, score,
       JSON.stringify({ checks, total: score, max }),
       JSON.stringify(prompts),
-      body.requested_full_audit === '1' || body.requested_full_audit === true ? 1 : 0,
+      requested_full_audit ? 1 : 0,
       created_at).run();
   } catch (dbErr) {
-    // DB write failed (tables may not exist) — log and continue, still return results
     console.error('DB write failed:', dbErr?.message || dbErr);
   }
 
+  // Send lead notification email — non-fatal
+  try {
+    await sendLeadNotification(env, { body, domain, score, checks, requested_full_audit });
+  } catch (emailErr) {
+    console.error('Email notification failed:', emailErr?.message || emailErr);
+  }
+
   return json({ ok: true, score, max, grade: gradeScore(score), checks, prompts,
-    requested_full_audit: body.requested_full_audit === '1' || body.requested_full_audit === true,
-    booking_url: BOOKING_URL });
+    requested_full_audit, booking_url: BOOKING_URL });
+}
+
+// ─────────────────────────────────────────────
+// Email notification via MailChannels
+// Requires NOTIFY_EMAIL and NOTIFY_FROM env vars
+// Also requires MailChannels Send API enabled on domain (free for CF Workers)
+// ─────────────────────────────────────────────
+async function sendLeadNotification(env, { body, domain, score, checks, requested_full_audit }) {
+  const to = env.NOTIFY_EMAIL;
+  const from = env.NOTIFY_FROM || `noreply@agentfeedoptimization.com`;
+  if (!to) return; // silently skip if not configured
+
+  const grade = gradeScore(score);
+  const auditFlag = requested_full_audit ? '🔥 WANTS FULL AUDIT' : '';
+  const passedChecks = checks.filter(c => c.passed).map(c => `  ✓ ${c.label}`).join('\n');
+  const failedChecks = checks.filter(c => !c.passed).map(c => `  × ${c.label}`).join('\n');
+
+  const subject = `${auditFlag ? '[AUDIT REQUEST] ' : ''}New AFO Snapshot — ${body.business_name} (${score}/100, Grade ${grade.grade})`;
+
+  const text = [
+    `New AFO Visibility Snapshot submission`,
+    ``,
+    `Name:     ${body.name}`,
+    `Email:    ${body.email}`,
+    `Business: ${body.business_name}`,
+    `Website:  ${domain}`,
+    `Category: ${body.business_category}`,
+    `Area:     ${body.city_or_service_area}`,
+    `Services: ${body.top_services}`,
+    `Customer: ${body.ideal_customer}`,
+    ``,
+    `Score:    ${score}/100  Grade: ${grade.grade} — ${grade.label}`,
+    `Full Audit Requested: ${requested_full_audit ? 'YES 🔥' : 'No'}`,
+    ``,
+    `Passed (${checks.filter(c=>c.passed).length}/10):`,
+    passedChecks || '  (none)',
+    ``,
+    `Failed (${checks.filter(c=>!c.passed).length}/10):`,
+    failedChecks || '  (none)',
+    ``,
+    `Book URL: https://cal.com/jared-edwards-gscxmo`,
+  ].join('\n');
+
+  const htmlBody = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#28251d">
+      <div style="background:#01696f;color:#fff;padding:1.25rem 1.5rem;border-radius:8px 8px 0 0">
+        <h2 style="margin:0;font-size:1.1rem">New AFO Snapshot Submission</h2>
+        ${requested_full_audit ? '<p style="margin:0.4rem 0 0;font-size:0.9rem;background:rgba(255,255,255,0.2);display:inline-block;padding:0.2rem 0.6rem;border-radius:4px">🔥 Full Audit Requested</p>' : ''}
+      </div>
+      <div style="background:#fff;border:1px solid #dcd9d5;border-top:none;border-radius:0 0 8px 8px;padding:1.5rem">
+        <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+          <tr><td style="padding:0.4rem 0;color:#7a7974;width:120px">Name</td><td style="padding:0.4rem 0;font-weight:600">${body.name}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:#7a7974">Email</td><td style="padding:0.4rem 0"><a href="mailto:${body.email}" style="color:#01696f">${body.email}</a></td></tr>
+          <tr><td style="padding:0.4rem 0;color:#7a7974">Business</td><td style="padding:0.4rem 0;font-weight:600">${body.business_name}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:#7a7974">Website</td><td style="padding:0.4rem 0"><a href="https://${domain}" style="color:#01696f">${domain}</a></td></tr>
+          <tr><td style="padding:0.4rem 0;color:#7a7974">Area</td><td style="padding:0.4rem 0">${body.city_or_service_area}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:#7a7974">Services</td><td style="padding:0.4rem 0">${body.top_services}</td></tr>
+        </table>
+        <div style="margin:1.25rem 0;padding:1rem;background:#f7f6f2;border-radius:8px;text-align:center">
+          <div style="font-size:2rem;font-weight:800;color:#01696f">${score}<span style="font-size:1rem;font-weight:400;color:#7a7974">/100</span></div>
+          <div style="font-size:0.9rem;font-weight:600;margin-top:0.25rem">Grade ${grade.grade} — ${grade.label}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:0.82rem">
+          <div>
+            <div style="font-weight:700;color:#437a22;margin-bottom:0.4rem">Passed (${checks.filter(c=>c.passed).length})</div>
+            ${checks.filter(c=>c.passed).map(c=>`<div style="color:#437a22">✓ ${c.label}</div>`).join('')||'<div style="color:#7a7974">none</div>'}
+          </div>
+          <div>
+            <div style="font-weight:700;color:#a12c7b;margin-bottom:0.4rem">Failed (${checks.filter(c=>!c.passed).length})</div>
+            ${checks.filter(c=>!c.passed).map(c=>`<div style="color:#a12c7b">× ${c.label}</div>`).join('')||'<div style="color:#7a7974">none</div>'}
+          </div>
+        </div>
+        ${requested_full_audit ? `<div style="margin-top:1.25rem;text-align:center"><a href="https://cal.com/jared-edwards-gscxmo" style="background:#01696f;color:#fff;padding:0.7rem 1.5rem;border-radius:9999px;text-decoration:none;font-weight:700;font-size:0.9rem">Book Discovery Call →</a></div>` : ''}
+      </div>
+    </div>`;
+
+  await fetch('https://api.mailchannels.net/tx/v1/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: to }] }],
+      from: { email: from, name: 'AFO Snapshot' },
+      subject,
+      content: [
+        { type: 'text/plain', value: text },
+        { type: 'text/html',  value: htmlBody }
+      ]
+    })
+  });
 }
 
 function validateFields(body) {
