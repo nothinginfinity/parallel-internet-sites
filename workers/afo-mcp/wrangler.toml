@@ -1,0 +1,19 @@
+name = "afo-mcp"
+main = "index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "afo-v1"
+database_id = "ccbd076e-aaa7-42bb-8808-a20bd83569e2"
+
+[vars]
+# Auth is handled by Cloudflare Access (Zero Trust)
+# Add your Access Application audience tag as CF_ACCESS_AUD in dashboard secrets
+# Worker is deployed behind a Cloudflare Access policy
+
+[observability]
+  [observability.logs]
+  enabled = true
+  invocation_logs = true
