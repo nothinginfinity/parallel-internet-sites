@@ -2,6 +2,12 @@ name = "afo-audit-signup"
 main = "index.js"
 compatibility_date = "2024-09-23"
 
+# Route: owns /signup on the main domain.
+# afo-site Worker owns the wildcard catch-all (agentfeedoptimization.com/*).
+routes = [
+  { pattern = "agentfeedoptimization.com/signup", zone_name = "agentfeedoptimization.com" }
+]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "afo-v1"
@@ -11,5 +17,5 @@ database_id = "ccbd076e-aaa7-42bb-8808-a20bd83569e2"
 GITHUB_REPO_OWNER = "nothinginfinity"
 GITHUB_REPO_NAME = "agent-feed-optimization"
 
-# Secrets managed via Cloudflare dashboard (not overridden here):
+# Secrets managed via Cloudflare dashboard:
 # EMAIL_PROVIDER, EMAIL_API_KEY, EMAIL_FROM, ADMIN_EMAIL, GITHUB_TOKEN, TURNSTILE_SECRET
