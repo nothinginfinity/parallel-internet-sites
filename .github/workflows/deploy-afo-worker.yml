@@ -1,0 +1,55 @@
+name: Deploy AFO Visibility Snapshot Worker
+
+# Triggers:
+#   1. Push to main that touches the worker source
+#   2. Manual trigger from the Actions tab (lets you force-redeploy without a code change)
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'workers/visibility-snapshot/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual deploy (optional)'
+        required: false
+        default: 'Manual redeploy'
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Workers
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/visibility-snapshot
+
+    steps:
+      # 1. Check out the repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Deploy with Wrangler
+      #    - CLOUDFLARE_API_TOKEN must be set in repo Settings → Secrets → Actions
+      #    - CLOUDFLARE_ACCOUNT_ID must be set in repo Settings → Variables → Actions
+      #      (it is not sensitive, but keeping it a var is tidy)
+      #    - wrangler reads wrangler.toml from the working-directory automatically
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/visibility-snapshot
+          # Uncomment the line below if you want wrangler output in GitHub Actions summary
+          # command: deploy --dry-run   # remove --dry-run for real deploys
+
+      # 3. Post a summary so you can see the deploy URL in the Actions tab
+      - name: Summary
+        if: success()
+        run: |
+          echo "### ✅ AFO Worker Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Worker:** afo-visibility-snapshot" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Live URL:** https://agentfeedoptimization.com/start" >> $GITHUB_STEP_SUMMARY
