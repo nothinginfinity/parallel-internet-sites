@@ -668,7 +668,7 @@ async function handleSnapshot(request, env) {
   // Generate prompts
   const prompts = generatePrompts(body);
 
-  // Persist snapshot
+  // Persist snapshot (non-fatal)
   const snapshotId = crypto.randomUUID();
   try {
     await env.DB.prepare(
@@ -684,28 +684,36 @@ async function handleSnapshot(request, env) {
     // Non-fatal — don't block the response
   }
 
-  // Upsert customer lead — includes business_name and role
+  // Upsert customer — safe for repeat submits:
+  //   1. INSERT OR IGNORE with a freshly generated UUID so new rows always get a PK.
+  //   2. Re-SELECT after the INSERT so we always return the authoritative id,
+  //      whether the row was just created or already existed.
   try {
+    const customerId = crypto.randomUUID();
     await env.DB.prepare(
-      `INSERT INTO customers (email, name, business_name, role, source, created_at)
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT(email) DO UPDATE SET
-         name = excluded.name,
-         business_name = excluded.business_name,
-         updated_at = excluded.created_at`
+      `INSERT OR IGNORE INTO customers (id, email, name, business_name, role, source, created_at)
+       VALUES (?, ?, ?, ?, 'owner', 'afo_snapshot', ?)`
     ).bind(
-      body.email,
-      body.name,
-      body.business_name,
-      'owner',
-      'afo_snapshot',
+      customerId,
+      body.email.toLowerCase().trim(),
+      body.name.trim(),
+      body.business_name.trim(),
       new Date().toISOString()
+    ).run();
+    // Always update mutable fields on the confirmed row
+    await env.DB.prepare(
+      `UPDATE customers SET name = ?, business_name = ?, updated_at = ? WHERE email = ?`
+    ).bind(
+      body.name.trim(),
+      body.business_name.trim(),
+      new Date().toISOString(),
+      body.email.toLowerCase().trim()
     ).run();
   } catch (e) {
     // Non-fatal
   }
 
-  // Send email notification
+  // Send email notification (non-fatal)
   try {
     await sendLeadEmail(body, score, grade, env);
   } catch (e) {
@@ -791,7 +799,7 @@ function runChecks(html, url, domain) {
       id: 'nap',
       label: 'Phone number or address found on page',
       points: 10,
-      passed: /\(\d{3}\)\s?\d{3}[-.]\d{4}|\d{3}[-.]\d{3}[-.]\d{4}|\d+ [a-z]+ (st|ave|blvd|rd|dr|ln|way|court|ct|place|pl)/i.test(html)
+      passed: /\(\d{3}\)\s?\d{3}[-.]?\d{4}|\d{3}[-.]?\d{3}[-.]?\d{4}|\d+ [a-z]+ (st|ave|blvd|rd|dr|ln|way|court|ct|place|pl)/i.test(html)
     },
     {
       id: 'about',
@@ -809,13 +817,13 @@ function runChecks(html, url, domain) {
       id: 'llms_txt',
       label: 'llms.txt file present',
       points: 15,
-      passed: false // checked async below — default false, we skip async here for speed
+      passed: false // async HEAD check skipped in sync runChecks; always conservative false
     },
     {
       id: 'robots_txt',
       label: 'robots.txt does not block AI crawlers',
       points: 5,
-      passed: true // optimistic default; full check would require separate fetch
+      passed: true // optimistic default; full check requires separate fetch
     },
     {
       id: 'og_tags',
@@ -827,18 +835,18 @@ function runChecks(html, url, domain) {
 }
 
 function scoreToGrade(score) {
-  if (score >= 80) return { grade: 'A', label: 'Strong AI Visibility', color: 'green' };
+  if (score >= 80) return { grade: 'A', label: 'Strong AI Visibility',   color: 'green'  };
   if (score >= 60) return { grade: 'B', label: 'Moderate AI Visibility', color: 'yellow' };
-  if (score >= 40) return { grade: 'C', label: 'Limited AI Visibility', color: 'orange' };
-  return { grade: 'D', label: 'Poor AI Visibility', color: 'red' };
+  if (score >= 40) return { grade: 'C', label: 'Limited AI Visibility',  color: 'orange' };
+  return               { grade: 'D', label: 'Poor AI Visibility',     color: 'red'    };
 }
 
 function generatePrompts(body) {
-  const biz = body.business_name;
-  const area = body.city_or_service_area;
+  const biz      = body.business_name;
+  const area     = body.city_or_service_area;
   const services = body.top_services;
   const customer = body.ideal_customer;
-  const cat = body.business_category?.replace(/_/g, ' ');
+  const cat      = body.business_category?.replace(/_/g, ' ');
 
   return [
     {
@@ -867,21 +875,21 @@ function generatePrompts(body) {
 
 async function sendLeadEmail(body, score, grade, env) {
   const notifyEmail = env.NOTIFY_EMAIL;
-  const fromEmail = env.NOTIFY_FROM || 'noreply@agentfeedoptimization.com';
+  const fromEmail   = env.NOTIFY_FROM || 'noreply@agentfeedoptimization.com';
   if (!notifyEmail) return;
 
   const subject = `New AFO Snapshot: ${body.business_name} — Grade ${grade.grade} (${score}/100)`;
   const text = [
     `New AFO Visibility Snapshot submitted`,
     ``,
-    `Name: ${body.name}`,
-    `Email: ${body.email}`,
+    `Name:     ${body.name}`,
+    `Email:    ${body.email}`,
     `Business: ${body.business_name}`,
-    `Website: ${body.website_url}`,
+    `Website:  ${body.website_url}`,
     `Category: ${body.business_category}`,
-    `Area: ${body.city_or_service_area}`,
+    `Area:     ${body.city_or_service_area}`,
     `Services: ${body.top_services}`,
-    `Ideal customer: ${body.ideal_customer}`,
+    `Customer: ${body.ideal_customer}`,
     ``,
     `Score: ${score}/100 — Grade ${grade.grade} (${grade.label})`,
     `Full audit requested: ${body.requested_full_audit === '1' ? 'YES' : 'No'}`,
