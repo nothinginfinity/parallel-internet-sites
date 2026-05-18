@@ -17,6 +17,9 @@
 
 const BOOKING_URL = 'https://cal.com/jared-edwards-gscxmo';
 
+// Hostnames that belong to this worker — fetching them would cause a self-loop
+const SELF_DOMAINS = ['agentfeedoptimization.com', 'www.agentfeedoptimization.com'];
+
 // ─────────────────────────────────────────────
 // Inlined HTML pages
 // ─────────────────────────────────────────────
@@ -618,6 +621,9 @@ async function handleSnapshot(request, env) {
 
   const domain = extractDomain(website_url);
 
+  // Self-loop guard: skip fetching our own site (would cause a Worker subrequest loop)
+  const isSelfDomain = SELF_DOMAINS.includes(domain);
+
   const tsError = await verifyTurnstile(body['cf-turnstile-response'], env, request);
   if (tsError) return json({ error: tsError }, 400);
 
@@ -628,7 +634,7 @@ async function handleSnapshot(request, env) {
 
   try {
     const rateRow = await env.DB.prepare(
-      `SELECT COUNT(*) as cnt FROM snapshots WHERE domain = ? AND created_at > ?`
+      `SELECT COUNT(*) as cnt FROM visibility_snapshots WHERE domain = ? AND created_at > ?`
     ).bind(domain, windowStart).first();
     if (rateRow && rateRow.cnt >= maxPerDomain) {
       return json({ error: `Too many snapshots for this domain. Please try again in ${windowHours} hours.` }, 429);
@@ -637,27 +643,35 @@ async function handleSnapshot(request, env) {
     // If rate limit check fails, allow through
   }
 
-  // Fetch the website
+  // Fetch the website (skip for our own domain to avoid subrequest loop)
   let siteHtml = '';
   let siteReachable = true;
   let siteStatus = 0;
-  try {
-    const siteRes = await fetch(website_url, {
-      headers: { 'User-Agent': 'AFO-Snapshot-Bot/1.0 (+https://agentfeedoptimization.com)' },
-      signal: AbortSignal.timeout(8000)
-    });
-    siteStatus = siteRes.status;
-    if (siteRes.ok) {
-      siteHtml = await siteRes.text();
-    } else {
+
+  if (isSelfDomain) {
+    // We can't fetch ourselves — treat as reachable with empty HTML
+    // Checks that require HTML content will conservatively fail
+    siteHtml = '';
+    siteReachable = true;
+  } else {
+    try {
+      const siteRes = await fetch(website_url, {
+        headers: { 'User-Agent': 'AFO-Snapshot-Bot/1.0 (+https://agentfeedoptimization.com)' },
+        signal: AbortSignal.timeout(8000)
+      });
+      siteStatus = siteRes.status;
+      if (siteRes.ok) {
+        siteHtml = await siteRes.text();
+      } else {
+        siteReachable = false;
+      }
+    } catch (e) {
       siteReachable = false;
     }
-  } catch (e) {
-    siteReachable = false;
-  }
 
-  if (!siteReachable) {
-    return json({ ok: true, error: 'unreachable', message: `We couldn't reach ${website_url} (status ${siteStatus || 'timeout'}). Please check the URL and try again.` });
+    if (!siteReachable) {
+      return json({ ok: true, error: 'unreachable', message: `We couldn't reach ${website_url} (status ${siteStatus || 'timeout'}). Please check the URL and try again.` });
+    }
   }
 
   // Run 10 visibility checks
@@ -672,7 +686,7 @@ async function handleSnapshot(request, env) {
   const snapshotId = crypto.randomUUID();
   try {
     await env.DB.prepare(
-      `INSERT INTO snapshots (id, domain, email, name, business_name, city_or_service_area, business_category, score, grade, requested_full_audit, created_at)
+      `INSERT INTO visibility_snapshots (id, domain, email, name, business_name, city_or_service_area, business_category, score, grade, requested_full_audit, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       snapshotId, domain, body.email, body.name, body.business_name,
@@ -684,10 +698,7 @@ async function handleSnapshot(request, env) {
     // Non-fatal — don't block the response
   }
 
-  // Upsert customer — safe for repeat submits:
-  //   1. INSERT OR IGNORE with a freshly generated UUID so new rows always get a PK.
-  //   2. Re-SELECT after the INSERT so we always return the authoritative id,
-  //      whether the row was just created or already existed.
+  // Upsert customer
   try {
     const customerId = crypto.randomUUID();
     await env.DB.prepare(
@@ -700,7 +711,6 @@ async function handleSnapshot(request, env) {
       body.business_name.trim(),
       new Date().toISOString()
     ).run();
-    // Always update mutable fields on the confirmed row
     await env.DB.prepare(
       `UPDATE customers SET name = ?, business_name = ?, updated_at = ? WHERE email = ?`
     ).bind(
