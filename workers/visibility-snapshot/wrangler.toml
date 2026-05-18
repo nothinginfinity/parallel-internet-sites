@@ -2,13 +2,9 @@ name = "afo-visibility-snapshot"
 main = "index.js"
 compatibility_date = "2024-09-23"
 
-# Routes: owns /start, /results, and /api/visibility-snapshot only.
-# afo-site Worker owns the wildcard catch-all (agentfeedoptimization.com/*).
-routes = [
-  { pattern = "agentfeedoptimization.com/start", zone_name = "agentfeedoptimization.com" },
-  { pattern = "agentfeedoptimization.com/results", zone_name = "agentfeedoptimization.com" },
-  { pattern = "agentfeedoptimization.com/api/visibility-snapshot", zone_name = "agentfeedoptimization.com" }
-]
+# Routes are managed in the Cloudflare dashboard, not here.
+# This Worker owns: /start, /results, /api/visibility-snapshot
+# afo-site owns the catch-all: agentfeedoptimization.com/*
 
 [[d1_databases]]
 binding = "DB"
